@@ -25,6 +25,7 @@ MyHello v1 is an internal-use, web-only digital business card builder inspired b
 - **Save contact / download vCard**: Generate and download a `.vcf` file so recipients can save the contact on their phone.
 - **Mobile-friendly web view**: Responsive design for card view and editor, optimized for mobile browsers.
 - **Admin dashboard (minimum)**: Basic tools to view users/cards and block/disable or delete users when required.
+- **Admin safety guardrails**: Prevent admins from deleting themselves, prevent deleting the last remaining admin, and provide a separate "remove my presence" action (deactivate card + optional profile anonymization) without deleting the auth account.
 - **Runtime error reporting (Prod)**: Capture client + server exceptions in an error tracker (e.g., Sentry) with stack traces and breadcrumbs.
 - **Structured app logging (Prod)**: Use Vercel logs for operational debugging; keep DB writes for auditable events only (e.g., "card updated", "admin blocked user"), not raw stack traces.
 
@@ -136,16 +137,24 @@ Implementation: Button links to `src/app/card/[slug]/vcard/route.ts`, which retu
 #### I.3 - Verify import works on iOS/Android [Implemented]
 Implementation: Manual test completed (downloaded `.vcf` opens as contact card on mobile and can be saved).
 
-### Step J - Admin dashboard (minimum) [Implemented]
-Implementation: `/admin` uses a service-role Supabase client (server-only) and an allowlist table `public.admin_users`.
+### Step J - Admin dashboard (minimum) [Partially implemented]
+Implementation: `/admin` uses a service-role Supabase client (server-only) and an allowlist table `public.admin_users`; safety guardrails (self-delete / last-admin protections) are pending.
 #### J.1 - Admin dashboard layout + navigation [Implemented]
 Implementation: Admin page is `src/app/admin/page.tsx` with simple table layout and dashboard back-link.
 #### J.2 - User list + ability to block/disable [Implemented]
 Implementation: `setUserBlocked()` in `src/app/admin/actions.ts` toggles `profiles.is_blocked` and flips `cards.is_active`.
-#### J.3 - Ability to delete users (and associated card data) [Implemented]
-Implementation: `deleteUser()` removes cards/profile and best-effort deletes the auth user via `admin.auth.admin.deleteUser()`.
+#### J.3 - Ability to delete users (and associated card data) [Partially implemented]
+Implementation: `deleteUser()` removes cards/profile and best-effort deletes the auth user via `admin.auth.admin.deleteUser()`; it does not delete avatar files from Storage yet, and protections for self-delete / last-admin delete are not enforced yet.
 #### J.4 - Basic card management view (optional, minimal) [Implemented]
 Implementation: Admin list shows user's first card slug/name and links to the public card page.
+#### J.5 - Prevent admins from deleting themselves [Not implemented]
+Implementation: Hide the Delete button for `actorUserId` and enforce a server-side check in `deleteUser()` to reject self-deletes.
+#### J.6 - Prevent deleting the last remaining admin [Not implemented]
+Implementation: In `deleteUser()`, count remaining rows in `public.admin_users` and block deletion when it would remove the last admin.
+#### J.7 - "Remove my presence" without deleting auth account [Not implemented]
+Implementation: Add an action to deactivate the admin's card (and optionally anonymize profile/card fields) while keeping the auth user and `admin_users` row intact.
+#### J.8 - Delete user's Storage files on user delete [Not implemented]
+Implementation: Before deleting the auth user, delete `avatars/<user_id>/*` from Supabase Storage (service-role client) to avoid orphaned files.
 
 ### Step K - Polish and guardrails [Partially implemented]
 Implementation: UI uses a small tokenized palette and basic states; additional production hardening (rate limits) is deferred.
