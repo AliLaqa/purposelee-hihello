@@ -45,74 +45,133 @@ MyHello v1 is an internal-use, web-only digital business card builder inspired b
 
 ## Build Plan (v1)
 
-### Step A - Project foundation [Partially implemented]
+### Step A - Project foundation [Implemented]
+Implementation: Next.js App Router project scaffolded, with centralized styling tokens and baseline configs committed.
 #### A.1 - Initialize Next.js (App Router) + TypeScript [Implemented]
+Implementation: Bootstrapped via `create-next-app` with `--ts --app --src-dir` and validated with `npm run build`.
 #### A.2 - Baseline linting and styling (ESLint + Tailwind) [Implemented]
-#### A.3 - Define env var strategy and local config approach [Not implemented]
+Implementation: ESLint config uses `eslint-config-next`, and styling uses Tailwind + CSS variables in `src/app/globals.css`.
+#### A.3 - Define env var strategy and local config approach [Implemented]
+Implementation: `.env.example` documents required vars; `src/lib/env.ts` reads/validates Supabase config and supports safe fallbacks.
 
-### Step B - Supabase project setup [Not implemented]
-#### B.1 - Create Supabase project [Not implemented]
-#### B.2 - Configure Supabase Auth providers (minimal) [Not implemented]
-#### B.3 - Create Storage bucket(s) for card images [Not implemented]
-#### B.4 - Configure app env vars (public URL + anon key; server-only service role key) [Not implemented]
+### Step B - Supabase project setup [Implemented]
+Implementation: Setup is performed in Supabase Dashboard; the repo provides migrations/README and the app reads keys from `.env.local`.
+#### B.1 - Create Supabase project [Implemented]
+Implementation: Created in Supabase Dashboard (region closest to users; Data API enabled; "Automatically expose new tables" may be OFF).
+#### B.2 - Configure Supabase Auth providers (minimal) [Implemented]
+Implementation: Email/password auth is used; email confirmations can be disabled for local testing to avoid email rate limits.
+#### B.3 - Create Storage bucket(s) for card images [Implemented]
+Implementation: Bucket `avatars` is created as Public, and an INSERT policy allows uploads only to `${auth.uid()}/...` paths.
+#### B.4 - Configure app env vars (public URL + anon key; server-only service role key) [Implemented]
+Implementation: `.env.local` sets `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, and `NEXT_PUBLIC_SITE_URL`.
 
-### Step C - Database schema + RLS policies [Not implemented]
-#### C.1 - Create `cards` (or `profiles`) table with ownership (`user_id`) and `slug` [Not implemented]
-#### C.2 - Add constraints (unique `slug`, required fields) [Not implemented]
-#### C.3 - Add RLS: owner can create/update; public can read by `slug` [Not implemented]
-#### C.4 - Add "blocked/disabled" handling for users (minimal mechanism) [Not implemented]
+### Step C - Database schema + RLS policies [Implemented]
+Implementation: Schema/RLS are defined in `supabase/migrations/*.sql` and applied via Supabase SQL Editor in order.
+#### C.1 - Create `cards` (or `profiles`) table with ownership (`user_id`) and `slug` [Implemented]
+Implementation: `public.profiles` (signup trigger) and `public.cards` tables are created in `supabase/migrations/0001_init.sql`.
+#### C.2 - Add constraints (unique `slug`, required fields) [Implemented]
+Implementation: `cards.slug` is unique and v1 enforces one card per user via `uniq_cards_user_id` (see `0002_fix_cards_rls_recursion.sql`).
+#### C.3 - Add RLS: owner can create/update; public can read by `slug` [Implemented]
+Implementation: RLS allows public SELECT for active cards and owner-only writes; public policy was corrected in `0004_fix_public_cards_policy.sql`.
+#### C.4 - Add "blocked/disabled" handling for users (minimal mechanism) [Implemented]
+Implementation: `profiles.is_blocked` blocks usage, and admin block also flips `cards.is_active` to disable public viewing.
 
-### Step D - Authentication UX (User + Admin) [Not implemented]
-#### D.1 - Implement normal user login/signup pages [Not implemented]
-#### D.2 - Add login mode toggle (Admin vs Normal) on the login screen [Not implemented]
-#### D.3 - Enforce server-side admin verification for admin routes [Not implemented]
-#### D.4 - Ensure admin can also use normal user flows [Not implemented]
+### Step D - Authentication UX (User + Admin) [Implemented]
+Implementation: Auth uses Supabase sessions via `@supabase/ssr` with server actions for login/signup and cookie refresh via proxy.
+#### D.1 - Implement normal user login/signup pages [Implemented]
+Implementation: `/auth` UI + server actions live in `src/app/auth/page.tsx` and `src/app/auth/actions.ts`.
+#### D.2 - Add login mode toggle (Admin vs Normal) on the login screen [Implemented]
+Implementation: Radio toggle in `/auth` posts `login_mode` and redirects to `/dashboard` or `/admin`.
+#### D.3 - Enforce server-side admin verification for admin routes [Implemented]
+Implementation: `requireAdmin()` checks `public.admin_users` (allowlist) before rendering `/admin`.
+#### D.4 - Ensure admin can also use normal user flows [Implemented]
+Implementation: Admins use the same credentials; only `/admin` is guarded by allowlist, normal `/dashboard` remains accessible.
 
-### Step E - Card editor (create/edit) [Not implemented]
-#### E.1 - Create dashboard page for card creation/edit [Not implemented]
-#### E.2 - Implement slug creation + validation rules [Not implemented]
-#### E.3 - Save card data to Supabase [Not implemented]
-#### E.4 - Enforce card count limit per user (start at 1; optionally cap at 3) [Not implemented]
+### Step E - Card editor (create/edit) [Implemented]
+Implementation: Card editor is in `/dashboard/card` with a server action that inserts/updates `public.cards` for the current user.
+#### E.1 - Create dashboard page for card creation/edit [Implemented]
+Implementation: `/dashboard` and `/dashboard/card` are implemented in `src/app/dashboard/page.tsx` and `src/app/dashboard/card/page.tsx`.
+#### E.2 - Implement slug creation + validation rules [Implemented]
+Implementation: `slugify()` and `isValidSlug()` live in `src/lib/cards/slug.ts` and are enforced in the card save action.
+#### E.3 - Save card data to Supabase [Implemented]
+Implementation: `upsertCard()` in `src/app/dashboard/card/actions.ts` uses Supabase SSR client to insert/update the user's card.
+#### E.4 - Enforce card count limit per user (start at 1; optionally cap at 3) [Implemented]
+Implementation: One-card-per-user is enforced via DB unique index `uniq_cards_user_id` (not via an RLS self-query).
 
-### Step F - Image upload [Not implemented]
-#### F.1 - Upload image to Supabase Storage [Not implemented]
-#### F.2 - Store image reference (path/url) on the card record [Not implemented]
-#### F.3 - Display image in editor preview + public card page [Not implemented]
+### Step F - Image upload [Implemented]
+Implementation: Images upload to the `avatars` bucket using the user-id folder path convention and are read via public URL.
+#### F.1 - Upload image to Supabase Storage [Implemented]
+Implementation: `upsertCard()` uploads the selected file to `avatars` at `${userId}/{uuid}.ext` (no overwrite/upsert required).
+#### F.2 - Store image reference (path/url) on the card record [Implemented]
+Implementation: The Storage object path is stored in `cards.avatar_path` and reused for subsequent renders.
+#### F.3 - Display image in editor preview + public card page [Implemented]
+Implementation: Both pages call `supabase.storage.from('avatars').getPublicUrl(avatar_path)` and render the resulting URL.
 
-### Step G - Public card page [Not implemented]
-#### G.1 - Implement `/card/[slug]` route rendering card data [Not implemented]
-#### G.2 - Handle not-found / disabled-card scenarios [Not implemented]
-#### G.3 - Add basic SEO + Open Graph metadata [Not implemented]
+### Step G - Public card page [Implemented]
+Implementation: `/card/[slug]` reads card data by slug with public RLS access and renders a mobile-friendly card view.
+#### G.1 - Implement `/card/[slug]` route rendering card data [Implemented]
+Implementation: `src/app/card/[slug]/page.tsx` queries `public.cards` by `slug` and renders details + QR + actions.
+#### G.2 - Handle not-found / disabled-card scenarios [Implemented]
+Implementation: Missing/blocked cards return `notFound()` and public visibility is controlled by `cards.is_active` + RLS.
+#### G.3 - Add basic SEO + Open Graph metadata [Partially implemented]
+Implementation: Base app metadata is set in `src/app/layout.tsx`; OG/image metadata for `/card/[slug]` is not customized in v1.
 
-### Step H - Sharing (link + QR + email) [Not implemented]
-#### H.1 - Add copy-link button [Not implemented]
-#### H.2 - Add Web Share API support (fallback to copy) [Not implemented]
-#### H.3 - Generate QR code from public URL [Not implemented]
-#### H.4 - Add email share via `mailto:` with prefilled subject/body [Not implemented]
+### Step H - Sharing (link + QR + email) [Implemented]
+Implementation: Sharing actions are client-side in `src/components/share/share_actions.tsx` and use the public card URL.
+#### H.1 - Add copy-link button [Implemented]
+Implementation: Copy uses `navigator.clipboard` when available with fallbacks for insecure contexts (execCommand/prompt).
+#### H.2 - Add Web Share API support (fallback to copy) [Implemented]
+Implementation: If `navigator.share` exists, a Share button calls `navigator.share({ title, url })`.
+#### H.3 - Generate QR code from public URL [Implemented]
+Implementation: `react-qr-code` renders a QR for `NEXT_PUBLIC_SITE_URL + /card/<slug>` in `src/app/card/[slug]/page.tsx`.
+#### H.4 - Add email share via `mailto:` with prefilled subject/body [Implemented]
+Implementation: Mailto is generated client-side with `subject` + `body` containing the public link.
 
-### Step I - vCard download [Not implemented]
-#### I.1 - Generate `.vcf` from card fields [Not implemented]
-#### I.2 - Add "Save contact" / download action on the card page [Not implemented]
-#### I.3 - Verify import works on iOS/Android [Not implemented]
+### Step I - vCard download [Implemented]
+Implementation: vCard content is generated server-side from DB data and returned as an attachment for phone import.
+#### I.1 - Generate `.vcf` from card fields [Implemented]
+Implementation: `src/lib/cards/vcard.ts` builds a vCard 3.0 string from name/company/email/phone.
+#### I.2 - Add "Save contact" / download action on the card page [Implemented]
+Implementation: Button links to `src/app/card/[slug]/vcard/route.ts`, which returns the `.vcf` with download headers.
+#### I.3 - Verify import works on iOS/Android [Implemented]
+Implementation: Manual test completed (downloaded `.vcf` opens as contact card on mobile and can be saved).
 
-### Step J - Admin dashboard (minimum) [Not implemented]
-#### J.1 - Admin dashboard layout + navigation [Not implemented]
-#### J.2 - User list + ability to block/disable [Not implemented]
-#### J.3 - Ability to delete users (and associated card data) [Not implemented]
-#### J.4 - Basic card management view (optional, minimal) [Not implemented]
+### Step J - Admin dashboard (minimum) [Implemented]
+Implementation: `/admin` uses a service-role Supabase client (server-only) and an allowlist table `public.admin_users`.
+#### J.1 - Admin dashboard layout + navigation [Implemented]
+Implementation: Admin page is `src/app/admin/page.tsx` with simple table layout and dashboard back-link.
+#### J.2 - User list + ability to block/disable [Implemented]
+Implementation: `setUserBlocked()` in `src/app/admin/actions.ts` toggles `profiles.is_blocked` and flips `cards.is_active`.
+#### J.3 - Ability to delete users (and associated card data) [Implemented]
+Implementation: `deleteUser()` removes cards/profile and best-effort deletes the auth user via `admin.auth.admin.deleteUser()`.
+#### J.4 - Basic card management view (optional, minimal) [Implemented]
+Implementation: Admin list shows user's first card slug/name and links to the public card page.
 
-### Step K - Polish and guardrails [Not implemented]
-#### K.1 - Mobile layout checks + UI polish [Not implemented]
-#### K.2 - Loading/error/empty states [Not implemented]
+### Step K - Polish and guardrails [Partially implemented]
+Implementation: UI uses a small tokenized palette and basic states; additional production hardening (rate limits) is deferred.
+#### K.1 - Mobile layout checks + UI polish [Implemented]
+Implementation: Public card and editor layouts were verified on mobile (QR open + responsive layout).
+#### K.2 - Loading/error/empty states [Implemented]
+Implementation: Auth and card editor render friendly error messages and show "No card yet" empty state on `/dashboard`.
 #### K.3 - Basic abuse controls on public endpoints (minimal) [Not implemented]
+Implementation: Not added in v1; can be implemented via simple IP throttling or middleware-based limits if needed.
 
-### Step L - Deployment + smoke test [Not implemented]
+### Step L - Deployment + smoke test [Partially implemented]
+Implementation: Local end-to-end testing is complete; Vercel deployment configuration is pending.
 #### L.1 - Deploy to Vercel [Not implemented]
-#### L.2 - Configure env vars + Auth redirect URLs [Not implemented]
-#### L.3 - End-to-end smoke test (signup -> create -> share -> QR scan -> vCard import) [Not implemented]
+Implementation: Pending (requires Vercel project creation and production env vars).
+#### L.2 - Configure env vars + Auth redirect URLs [Partially implemented]
+Implementation: `.env.local` is configured for local; production requires setting Vercel env vars + Supabase redirect URLs.
+#### L.3 - End-to-end smoke test (signup -> create -> share -> QR scan -> vCard import) [Implemented]
+Implementation: Verified locally: signup/login -> create card -> public link -> QR scan -> vCard download/import.
 
-### Step M - Observability (errors + logs) [Not implemented]
+### Step M - Observability (errors + logs) [Partially implemented]
+Implementation: Structured logging is in place and the app has a global error boundary; Sentry DSN wiring is optional.
 #### M.1 - Dev debugging via Next.js + console logs [Implemented]
-#### M.2 - Runtime error tracking in Prod (client + server) [Not implemented]
-#### M.3 - Structured server logging to Vercel logs [Not implemented]
-#### M.4 - DB audit events only (no raw stack traces) [Not implemented]
+Implementation: Dev uses Next.js overlay and server logs; key server actions also log failures (e.g., card insert/update).
+#### M.2 - Runtime error tracking in Prod (client + server) [Partially implemented]
+Implementation: `SENTRY_DSN` is supported; `src/app/global-error.tsx` captures client errors and `sentry_server.ts` is available for server use.
+#### M.3 - Structured server logging to Vercel logs [Implemented]
+Implementation: `src/lib/observability/log.ts` emits JSON logs to stdout/stderr which Vercel captures.
+#### M.4 - DB audit events only (no raw stack traces) [Partially implemented]
+Implementation: Admin actions insert `audit_events`; persistence of broader audit events can be added later (no stack traces stored).

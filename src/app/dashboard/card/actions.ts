@@ -1,0 +1,122 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { requireUser } from "@/lib/auth/guards";
+import { isValidSlug, slugify } from "@/lib/cards/slug";
+import { randomUUID } from "crypto";
+
+function getSiteUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL;
+  if (configured) return configured.replace(/\/+$/, "");
+  return "http://localhost:3000";
+}
+
+export async function upsertCard(formData: FormData) {
+  const { supabase, userId } = await requireUser();
+
+  const fullName = String(formData.get("full_name") || "").trim();
+  const company = String(formData.get("company") || "").trim();
+  const email = String(formData.get("email") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+  const rawSlug = String(formData.get("slug") || "").trim();
+
+  if (!fullName || !company || !email || !phone) {
+    redirect("/dashboard/card?error=missing_fields");
+  }
+
+  const slug = rawSlug ? slugify(rawSlug) : slugify(fullName);
+  if (!isValidSlug(slug)) {
+    redirect("/dashboard/card?error=invalid_slug");
+  }
+
+  const avatarFile = formData.get("avatar");
+  const avatar =
+    avatarFile && typeof avatarFile !== "string" ? avatarFile : null;
+
+  const { data: existing } = await supabase
+    .from("cards")
+    .select("id,avatar_path,slug")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  let avatarPath: string | null = existing?.avatar_path ?? null;
+
+  if (avatar && avatar.size > 0) {
+    const extension = avatar.name.split(".").pop()?.toLowerCase() || "png";
+    const safeExt = extension.replace(/[^a-z0-9]/g, "") || "png";
+    const filename = `${randomUUID()}.${safeExt}`;
+    const path = `${userId}/${filename}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(path, avatar, { upsert: false, contentType: avatar.type });
+
+    if (uploadError) {
+      console.error("Avatar upload failed", uploadError);
+      redirect("/dashboard/card?error=avatar_upload_failed");
+    }
+
+    avatarPath = path;
+  }
+
+  if (!existing) {
+    const { error } = await supabase.from("cards").insert({
+      user_id: userId,
+      slug,
+      full_name: fullName,
+      company,
+      email,
+      phone,
+      avatar_path: avatarPath,
+      is_active: true,
+    });
+
+    if (error) {
+      console.error("Card insert failed", error);
+      const isSlugConflict = String(error.message || "")
+        .toLowerCase()
+        .includes("duplicate key");
+      const code =
+        "code" in error && typeof error.code === "string" ? error.code : "";
+      redirect(
+        `/dashboard/card?error=${isSlugConflict ? "slug_taken" : "save_failed"}${
+          code ? `&code=${encodeURIComponent(code)}` : ""
+        }`
+      );
+    }
+  } else {
+    const { error } = await supabase
+      .from("cards")
+      .update({
+        slug,
+        full_name: fullName,
+        company,
+        email,
+        phone,
+        avatar_path: avatarPath,
+      })
+      .eq("id", existing.id);
+
+    if (error) {
+      console.error("Card update failed", error);
+      const isSlugConflict = String(error.message || "")
+        .toLowerCase()
+        .includes("duplicate key");
+      const code =
+        "code" in error && typeof error.code === "string" ? error.code : "";
+      redirect(
+        `/dashboard/card?error=${isSlugConflict ? "slug_taken" : "save_failed"}${
+          code ? `&code=${encodeURIComponent(code)}` : ""
+        }`
+      );
+    }
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/card");
+  revalidatePath(`/card/${slug}`);
+
+  const shareUrl = `${getSiteUrl()}/card/${encodeURIComponent(slug)}`;
+  redirect(`/dashboard/card?saved=1&share=${encodeURIComponent(shareUrl)}`);
+}
