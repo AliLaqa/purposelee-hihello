@@ -3,7 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseSecretKey } from "@/lib/env";
 
-export async function requireUser() {
+type RequireUserOptions = {
+  allowBlocked?: boolean;
+};
+
+export async function requireUser(options: RequireUserOptions = {}) {
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.getClaims();
@@ -37,15 +41,17 @@ export async function requireUser() {
   }
 
   if (profile?.is_blocked) {
-    await supabase.auth.signOut();
-    redirect("/auth?blocked=1");
+    if (!options.allowBlocked) {
+      await supabase.auth.signOut();
+      redirect("/auth?blocked=1");
+    }
   }
 
   return { supabase, userId, profile };
 }
 
 export async function requireAdmin() {
-  const { supabase, userId, profile } = await requireUser();
+  const { supabase, userId, profile } = await requireUser({ allowBlocked: true });
 
   const { data: adminRow } = await supabase
     .from("admin_users")

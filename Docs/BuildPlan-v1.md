@@ -147,14 +147,16 @@ Implementation: `setUserBlocked()` in `src/app/admin/actions.ts` toggles `profil
 Implementation: `deleteUser()` removes cards/profile, deletes the auth user, enforces self-delete/last-admin safeguards, and deletes `avatars/<user_id>/*` (manual test confirmed cleanup).
 #### J.4 - Basic card management view (optional, minimal) [Implemented] [Tested]
 Implementation: Admin list shows user's first card slug/name and links to the public card page.
-#### J.5 - Prevent admins from deleting themselves [Implemented] [Not tested]
-Implementation: UI hides Delete for the current admin and `deleteUser()` rejects self-deletes server-side.
+#### J.5 - Prevent admins from deleting themselves [Implemented] [Tested]
+Implementation: UI hides Delete for the current admin and `deleteUser()` rejects self-deletes server-side (manual request replay confirmed redirect to `?error=self_delete_not_allowed`).
 #### J.6 - Prevent deleting the last remaining admin [Implemented] [Not tested]
 Implementation: `deleteUser()` checks `public.admin_users` count and blocks deletion of the final admin.
 #### J.7 - "Remove my presence" without deleting auth account [Not implemented] [Not tested]
 Implementation: Add an action to deactivate the admin's card (and optionally anonymize profile/card fields) while keeping the auth user and `admin_users` row intact.
 #### J.8 - Delete user's Storage files on user delete [Implemented] [Tested]
 Implementation: `deleteUser()` lists and removes `avatars/<user_id>/*` via service-role storage client before deleting the auth user (manual test confirmed).
+#### J.9 - Blocking a user must not lock admins out of `/admin` [Implemented] [Tested]
+Implementation: `requireAdmin()` allows access for allowlisted admins even if their `profiles.is_blocked` is true, and the login action permits blocked admins when using "Admin login"; `requireUser()` continues to block normal user access.
 
 ### Step K - Polish and guardrails [Partially implemented]
 Implementation: UI uses a small tokenized palette and basic states; additional production hardening (rate limits) is deferred.

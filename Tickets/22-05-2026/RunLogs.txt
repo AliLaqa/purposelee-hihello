@@ -1,0 +1,17 @@
+PS G:\GithubProjects\purposelee-hihello> npm run dev
+
+> purposelee-hihello@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.100.147:3000
+- Environments: .env.local
+✓ Ready in 831ms
+⚠ Slow filesystem detected. The benchmark took 276ms. If G:\GithubProjects\purposelee-hihello\.next/dev is a network drive, consider moving it to a local folder.
+See more: https://nextjs.org/docs/app/guides/local-development
+
+ GET /auth?blocked=1 200 in 1291ms (next.js: 355ms, proxy.ts: 414ms, application-code: 522ms)
+ GET /auth?blocked=1 200 in 56ms (next.js: 5ms, proxy.ts: 9ms, application-code: 42ms)
+ POST /auth?blocked=1 303 in 1614ms (next.js: 7ms, proxy.ts: 11ms, application-code: 1596ms)
+  └─ ƒ login({}) in 1511ms src/app/auth/actions.ts

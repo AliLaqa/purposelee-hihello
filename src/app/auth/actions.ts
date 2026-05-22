@@ -11,6 +11,7 @@ function getNextPath(formData: FormData) {
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
+  const loginMode = String(formData.get("login_mode") || "user");
   const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
 
@@ -38,8 +39,12 @@ export async function login(formData: FormData) {
     .maybeSingle();
 
   if (profile?.is_blocked) {
-    await supabase.auth.signOut();
-    redirect("/auth?blocked=1");
+    // Blocked users cannot use the normal app. However, a blocked allowlisted admin
+    // must still be able to access `/admin` to unblock/manage accounts.
+    if (loginMode !== "admin") {
+      await supabase.auth.signOut();
+      redirect("/auth?blocked=1");
+    }
   }
 
   redirect(getNextPath(formData));
