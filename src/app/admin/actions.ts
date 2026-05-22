@@ -43,6 +43,47 @@ export async function deleteUser(formData: FormData) {
     redirect("/admin?error=missing_user");
   }
 
+  // Guardrail: prevent self-delete (admin identity == auth user).
+  if (userId === actorUserId) {
+    redirect("/admin?error=self_delete_not_allowed");
+  }
+
+  // Guardrail: prevent deleting the last remaining admin.
+  const { data: targetAdminRow } = await admin
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (targetAdminRow) {
+    const { count } = await admin
+      .from("admin_users")
+      .select("user_id", { count: "exact", head: true });
+
+    if (typeof count === "number" && count <= 1) {
+      redirect("/admin?error=cannot_delete_last_admin");
+    }
+  }
+
+  // Cleanup Storage files (best-effort) to avoid orphaned avatars.
+  // v1 path convention: `avatars/<user_id>/<uuid>.<ext>`
+  try {
+    const { data: files } = await admin.storage
+      .from("avatars")
+      .list(userId, { limit: 1000, offset: 0 });
+
+    const filePaths =
+      files
+        ?.filter((f) => f.id && f.name)
+        .map((f) => `${userId}/${f.name}`) ?? [];
+
+    if (filePaths.length > 0) {
+      await admin.storage.from("avatars").remove(filePaths);
+    }
+  } catch {
+    // ignore cleanup failures (do not block user deletion)
+  }
+
   await admin.from("cards").delete().eq("user_id", userId);
   await admin.from("profiles").delete().eq("id", userId);
 

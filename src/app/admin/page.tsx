@@ -11,7 +11,7 @@ type SearchParams = { error?: string };
 export default async function AdminPage(props: {
   searchParams: Promise<SearchParams>;
 }) {
-  await requireAdmin();
+  const { userId: actorUserId } = await requireAdmin();
   if (!getSupabaseSecretKey()) {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-16">
@@ -65,6 +65,10 @@ export default async function AdminPage(props: {
         <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
           {searchParams.error === "missing_user"
             ? "Missing user id."
+            : searchParams.error === "self_delete_not_allowed"
+            ? "You cannot delete your own admin account."
+            : searchParams.error === "cannot_delete_last_admin"
+            ? "You cannot delete the last remaining admin."
             : "Something went wrong."}
         </div>
       ) : null}
@@ -134,12 +138,14 @@ export default async function AdminPage(props: {
                     </button>
                   </form>
 
-                  <form action={deleteUser}>
-                    <input type="hidden" name="user_id" value={u.id} />
-                    <button className="h-9 rounded-xl border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700">
-                      Delete
-                    </button>
-                  </form>
+                  {u.id === actorUserId ? null : (
+                    <form action={deleteUser}>
+                      <input type="hidden" name="user_id" value={u.id} />
+                      <button className="h-9 rounded-xl border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700">
+                        Delete
+                      </button>
+                    </form>
+                  )}
                 </div>
               </div>
             );

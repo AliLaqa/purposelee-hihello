@@ -138,23 +138,23 @@ Implementation: Button links to `src/app/card/[slug]/vcard/route.ts`, which retu
 Implementation: Manual test completed (downloaded `.vcf` opens as contact card on mobile and can be saved).
 
 ### Step J - Admin dashboard (minimum) [Partially implemented]
-Implementation: `/admin` uses a service-role Supabase client (server-only) and an allowlist table `public.admin_users`; safety guardrails (self-delete / last-admin protections) are pending.
-#### J.1 - Admin dashboard layout + navigation [Implemented]
+Implementation: `/admin` uses a service-role Supabase client (server-only) and an allowlist table `public.admin_users`; "remove my presence" is pending.
+#### J.1 - Admin dashboard layout + navigation [Implemented] [Tested]
 Implementation: Admin page is `src/app/admin/page.tsx` with simple table layout and dashboard back-link.
-#### J.2 - User list + ability to block/disable [Implemented]
+#### J.2 - User list + ability to block/disable [Implemented] [Tested]
 Implementation: `setUserBlocked()` in `src/app/admin/actions.ts` toggles `profiles.is_blocked` and flips `cards.is_active`.
-#### J.3 - Ability to delete users (and associated card data) [Partially implemented]
-Implementation: `deleteUser()` removes cards/profile and best-effort deletes the auth user via `admin.auth.admin.deleteUser()`; it does not delete avatar files from Storage yet, and protections for self-delete / last-admin delete are not enforced yet.
-#### J.4 - Basic card management view (optional, minimal) [Implemented]
+#### J.3 - Ability to delete users (and associated card data) [Implemented] [Tested]
+Implementation: `deleteUser()` removes cards/profile, deletes the auth user, enforces self-delete/last-admin safeguards, and deletes `avatars/<user_id>/*` (manual test confirmed cleanup).
+#### J.4 - Basic card management view (optional, minimal) [Implemented] [Tested]
 Implementation: Admin list shows user's first card slug/name and links to the public card page.
-#### J.5 - Prevent admins from deleting themselves [Not implemented]
-Implementation: Hide the Delete button for `actorUserId` and enforce a server-side check in `deleteUser()` to reject self-deletes.
-#### J.6 - Prevent deleting the last remaining admin [Not implemented]
-Implementation: In `deleteUser()`, count remaining rows in `public.admin_users` and block deletion when it would remove the last admin.
-#### J.7 - "Remove my presence" without deleting auth account [Not implemented]
+#### J.5 - Prevent admins from deleting themselves [Implemented] [Not tested]
+Implementation: UI hides Delete for the current admin and `deleteUser()` rejects self-deletes server-side.
+#### J.6 - Prevent deleting the last remaining admin [Implemented] [Not tested]
+Implementation: `deleteUser()` checks `public.admin_users` count and blocks deletion of the final admin.
+#### J.7 - "Remove my presence" without deleting auth account [Not implemented] [Not tested]
 Implementation: Add an action to deactivate the admin's card (and optionally anonymize profile/card fields) while keeping the auth user and `admin_users` row intact.
-#### J.8 - Delete user's Storage files on user delete [Not implemented]
-Implementation: Before deleting the auth user, delete `avatars/<user_id>/*` from Supabase Storage (service-role client) to avoid orphaned files.
+#### J.8 - Delete user's Storage files on user delete [Implemented] [Tested]
+Implementation: `deleteUser()` lists and removes `avatars/<user_id>/*` via service-role storage client before deleting the auth user (manual test confirmed).
 
 ### Step K - Polish and guardrails [Partially implemented]
 Implementation: UI uses a small tokenized palette and basic states; additional production hardening (rate limits) is deferred.
