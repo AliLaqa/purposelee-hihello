@@ -149,8 +149,8 @@ Implementation: `deleteUser()` removes cards/profile, deletes the auth user, enf
 Implementation: Admin list shows user's first card slug/name and links to the public card page.
 #### J.5 - Prevent admins from deleting themselves [Implemented] [Tested]
 Implementation: UI hides Delete for the current admin and `deleteUser()` rejects self-deletes server-side (manual request replay confirmed redirect to `?error=self_delete_not_allowed`).
-#### J.6 - Prevent deleting the last remaining admin [Implemented] [Not tested]
-Implementation: `deleteUser()` checks `public.admin_users` count and blocks deletion of the final admin.
+#### J.6 - Prevent reducing admins below 2 [Implemented] [Tested]
+Implementation: `deleteUser()` checks `public.admin_users` count and blocks deletion when it would leave fewer than 2 admins (manual test confirmed `?error=cannot_delete_last_admin`).
 #### J.7 - "Remove my presence" without deleting auth account [Not implemented] [Not tested]
 Implementation: Add an action to deactivate the admin's card (and optionally anonymize profile/card fields) while keeping the auth user and `admin_users` row intact.
 #### J.8 - Delete user's Storage files on user delete [Implemented] [Tested]

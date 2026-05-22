@@ -68,7 +68,7 @@ export default async function AdminPage(props: {
             : searchParams.error === "self_delete_not_allowed"
             ? "You cannot delete your own admin account."
             : searchParams.error === "cannot_delete_last_admin"
-            ? "You cannot delete the last remaining admin."
+            ? "You must keep at least two admins."
             : "Something went wrong."}
         </div>
       ) : null}

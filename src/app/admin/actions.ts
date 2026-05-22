@@ -60,7 +60,8 @@ export async function deleteUser(formData: FormData) {
       .from("admin_users")
       .select("user_id", { count: "exact", head: true });
 
-    if (typeof count === "number" && count <= 1) {
+    // Keep at least 2 admins to avoid lockouts and ensure continuity.
+    if (typeof count === "number" && count <= 2) {
       redirect("/admin?error=cannot_delete_last_admin");
     }
   }
