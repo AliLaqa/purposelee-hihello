@@ -8,9 +8,11 @@ MyHello v1.1 is a small follow-up release after v1, focused on **operational/adm
 - **Safety:** Orphan cleanup supports preview/dry-run semantics and prevents accidental mass deletions.
 - **Auditability:** Orphan cleanup actions are recorded in `public.audit_events` (who did what, when, and what was affected).
 - **Usability:** Orphan cleanup UI clearly lists the orphaned file paths and the derived user UUID/folder.
+- **Admin presence control:** Admin can remove their public presence (deactivate card) without losing admin access, and restore it later without data loss.
 
 ## Functionalities (v1.1)
 - **Admin orphaned Storage cleanup**: Admin dashboard can scan Supabase Storage (`avatars`) for orphaned files, display exact identifiers (user UUID/folder + full object paths), and delete selected or all orphaned files after confirmation.
+- **Admin “Remove my presence”**: Admin can deactivate their own public card without deleting/clearing any profile/card fields or Storage files, so it can be restored later.
 
 ## What NOT to implement (out of scope for v1.1)
 - Auto-scheduled background cleanup jobs / cron-based deletion
@@ -36,3 +38,12 @@ Implementation: Insert an audit row per cleanup run (and optionally per deleted 
 #### A.6 - Add guardrails to prevent accidental mass deletion [Not implemented] [Not tested]
 Implementation: Add a hard cap per run (configurable) and require a second confirmation when deletions exceed a threshold.
 
+### Step B - Admin “Remove my presence” [Not implemented]
+Implementation: Add an explicit admin-only action to deactivate (and later restore) the admin’s public card without deleting/clearing any profile/card fields or Storage files, and without deleting the auth user or removing the `admin_users` allowlist row.
+#### B.1 - Add server action to deactivate admin card [Not implemented] [Not tested]
+Implementation: Update the admin’s `cards` row to set `is_active=false` (do not clear `avatar_path` or other fields).
+#### B.2 - Add server action to restore admin card [Not implemented] [Not tested]
+Implementation: Update the admin’s `cards` row to set `is_active=true` so the existing card + avatar come back without re-uploading.
+#### B.3 - Add admin UI entrypoint + confirmations [Not implemented] [Not tested]
+Implementation: Add a “Remove presence” / “Restore presence” action in `/admin` for the current admin with a clear warning/confirm step.
+Implementation: Insert audit events like `admin.remove_presence` / `admin.restore_presence` with minimal metadata (what changed).

@@ -5,6 +5,24 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/guards";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+async function deleteAvatarsForUser(
+  admin: ReturnType<typeof createAdminClient>,
+  userId: string,
+) {
+  const { data: files } = await admin.storage
+    .from("avatars")
+    .list(userId, { limit: 1000, offset: 0 });
+
+  const filePaths =
+    files
+      ?.filter((f) => f.id && f.name)
+      .map((f) => `${userId}/${f.name}`) ?? [];
+
+  if (filePaths.length > 0) {
+    await admin.storage.from("avatars").remove(filePaths);
+  }
+}
+
 export async function setUserBlocked(formData: FormData) {
   const { userId: actorUserId } = await requireAdmin();
   const admin = createAdminClient();
@@ -69,18 +87,7 @@ export async function deleteUser(formData: FormData) {
   // Cleanup Storage files (best-effort) to avoid orphaned avatars.
   // v1 path convention: `avatars/<user_id>/<uuid>.<ext>`
   try {
-    const { data: files } = await admin.storage
-      .from("avatars")
-      .list(userId, { limit: 1000, offset: 0 });
-
-    const filePaths =
-      files
-        ?.filter((f) => f.id && f.name)
-        .map((f) => `${userId}/${f.name}`) ?? [];
-
-    if (filePaths.length > 0) {
-      await admin.storage.from("avatars").remove(filePaths);
-    }
+    await deleteAvatarsForUser(admin, userId);
   } catch {
     // ignore cleanup failures (do not block user deletion)
   }

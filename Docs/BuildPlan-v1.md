@@ -25,7 +25,7 @@ MyHello v1 is an internal-use, web-only digital business card builder inspired b
 - **Save contact / download vCard**: Generate and download a `.vcf` file so recipients can save the contact on their phone.
 - **Mobile-friendly web view**: Responsive design for card view and editor, optimized for mobile browsers.
 - **Admin dashboard (minimum)**: Basic tools to view users/cards and block/disable or delete users when required.
-- **Admin safety guardrails**: Prevent admins from deleting themselves, prevent deleting the last remaining admin, and provide a separate "remove my presence" action (deactivate card + optional profile anonymization) without deleting the auth account.
+- **Admin safety guardrails**: Prevent admins from deleting themselves, require at least 2 admins, and delete user avatars from Storage when deleting users.
 - **Runtime error reporting (Prod)**: Capture client + server exceptions in an error tracker (e.g., Sentry) with stack traces and breadcrumbs.
 - **Structured app logging (Prod)**: Use Vercel logs for operational debugging; keep DB writes for auditable events only (e.g., "card updated", "admin blocked user"), not raw stack traces.
 
@@ -46,46 +46,46 @@ MyHello v1 is an internal-use, web-only digital business card builder inspired b
 
 ## Build Plan (v1)
 
-### Step A - Project foundation [Implemented]
+### Step A - Project foundation [Implemented] [Tested]
 Implementation: Next.js App Router project scaffolded, with centralized styling tokens and baseline configs committed.
-#### A.1 - Initialize Next.js (App Router) + TypeScript [Implemented]
+#### A.1 - Initialize Next.js (App Router) + TypeScript [Implemented] [Tested]
 Implementation: Bootstrapped via `create-next-app` with `--ts --app --src-dir` and validated with `npm run build`.
-#### A.2 - Baseline linting and styling (ESLint + Tailwind) [Implemented]
+#### A.2 - Baseline linting and styling (ESLint + Tailwind) [Implemented] [Tested]
 Implementation: ESLint config uses `eslint-config-next`, and styling uses Tailwind + CSS variables in `src/app/globals.css`.
-#### A.3 - Define env var strategy and local config approach [Implemented]
+#### A.3 - Define env var strategy and local config approach [Implemented] [Tested]
 Implementation: `.env.example` documents required vars; `src/lib/env.ts` reads/validates Supabase config and supports safe fallbacks.
 
-### Step B - Supabase project setup [Implemented]
+### Step B - Supabase project setup [Implemented] [Tested]
 Implementation: Setup is performed in Supabase Dashboard; the repo provides migrations/README and the app reads keys from `.env.local`.
-#### B.1 - Create Supabase project [Implemented]
+#### B.1 - Create Supabase project [Implemented] [Tested]
 Implementation: Created in Supabase Dashboard (region closest to users; Data API enabled; "Automatically expose new tables" may be OFF).
-#### B.2 - Configure Supabase Auth providers (minimal) [Implemented]
+#### B.2 - Configure Supabase Auth providers (minimal) [Implemented] [Tested]
 Implementation: Email/password auth is used; email confirmations can be disabled for local testing to avoid email rate limits.
-#### B.3 - Create Storage bucket(s) for card images [Implemented]
+#### B.3 - Create Storage bucket(s) for card images [Implemented] [Tested]
 Implementation: Bucket `avatars` is created as Public, and an INSERT policy allows uploads only to `${auth.uid()}/...` paths.
-#### B.4 - Configure app env vars (public URL + anon key; server-only service role key) [Implemented]
-Implementation: `.env.local` sets `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, and `NEXT_PUBLIC_SITE_URL`.
+#### B.4 - Configure app env vars (Supabase URL + publishable key; server-only service role key) [Implemented] [Tested]
+Implementation: `.env.local` sets `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, and `NEXT_PUBLIC_SITE_URL` (optional: `SENTRY_DSN`).
 
-### Step C - Database schema + RLS policies [Implemented]
+### Step C - Database schema + RLS policies [Implemented] [Tested]
 Implementation: Schema/RLS are defined in `supabase/migrations/*.sql` and applied via Supabase SQL Editor in order.
-#### C.1 - Create `cards` (or `profiles`) table with ownership (`user_id`) and `slug` [Implemented]
+#### C.1 - Create `cards` (or `profiles`) table with ownership (`user_id`) and `slug` [Implemented] [Tested]
 Implementation: `public.profiles` (signup trigger) and `public.cards` tables are created in `supabase/migrations/0001_init.sql`.
-#### C.2 - Add constraints (unique `slug`, required fields) [Implemented]
+#### C.2 - Add constraints (unique `slug`, required fields) [Implemented] [Tested]
 Implementation: `cards.slug` is unique and v1 enforces one card per user via `uniq_cards_user_id` (see `0002_fix_cards_rls_recursion.sql`).
-#### C.3 - Add RLS: owner can create/update; public can read by `slug` [Implemented]
+#### C.3 - Add RLS: owner can create/update; public can read by `slug` [Implemented] [Tested]
 Implementation: RLS allows public SELECT for active cards and owner-only writes; public policy was corrected in `0004_fix_public_cards_policy.sql`.
-#### C.4 - Add "blocked/disabled" handling for users (minimal mechanism) [Implemented]
+#### C.4 - Add "blocked/disabled" handling for users (minimal mechanism) [Implemented] [Tested]
 Implementation: `profiles.is_blocked` blocks usage, and admin block also flips `cards.is_active` to disable public viewing.
 
-### Step D - Authentication UX (User + Admin) [Implemented]
+### Step D - Authentication UX (User + Admin) [Implemented] [Tested]
 Implementation: Auth uses Supabase sessions via `@supabase/ssr` with server actions for login/signup and cookie refresh via proxy.
-#### D.1 - Implement normal user login/signup pages [Implemented]
+#### D.1 - Implement normal user login/signup pages [Implemented] [Tested]
 Implementation: `/auth` UI + server actions live in `src/app/auth/page.tsx` and `src/app/auth/actions.ts`.
-#### D.2 - Add login mode toggle (Admin vs Normal) on the login screen [Implemented]
+#### D.2 - Add login mode toggle (Admin vs Normal) on the login screen [Implemented] [Tested]
 Implementation: Radio toggle in `/auth` posts `login_mode` and redirects to `/dashboard` or `/admin`.
-#### D.3 - Enforce server-side admin verification for admin routes [Implemented]
+#### D.3 - Enforce server-side admin verification for admin routes [Implemented] [Tested]
 Implementation: `requireAdmin()` checks `public.admin_users` (allowlist) before rendering `/admin`.
-#### D.4 - Ensure admin can also use normal user flows [Implemented]
+#### D.4 - Ensure admin can also use normal user flows [Implemented] [Tested]
 Implementation: Admins use the same credentials; only `/admin` is guarded by allowlist, normal `/dashboard` remains accessible.
 
 ### Step E - Card editor (create/edit) [Implemented]
@@ -137,8 +137,8 @@ Implementation: Button links to `src/app/card/[slug]/vcard/route.ts`, which retu
 #### I.3 - Verify import works on iOS/Android [Implemented]
 Implementation: Manual test completed (downloaded `.vcf` opens as contact card on mobile and can be saved).
 
-### Step J - Admin dashboard (minimum) [Partially implemented]
-Implementation: `/admin` uses a service-role Supabase client (server-only) and an allowlist table `public.admin_users`; "remove my presence" is pending.
+### Step J - Admin dashboard (minimum) [Implemented] [Tested]
+Implementation: `/admin` uses a service-role Supabase client (server-only) and an allowlist table `public.admin_users`.
 #### J.1 - Admin dashboard layout + navigation [Implemented] [Tested]
 Implementation: Admin page is `src/app/admin/page.tsx` with simple table layout and dashboard back-link.
 #### J.2 - User list + ability to block/disable [Implemented] [Tested]
@@ -151,8 +151,6 @@ Implementation: Admin list shows user's first card slug/name and links to the pu
 Implementation: UI hides Delete for the current admin and `deleteUser()` rejects self-deletes server-side (manual request replay confirmed redirect to `?error=self_delete_not_allowed`).
 #### J.6 - Prevent reducing admins below 2 [Implemented] [Tested]
 Implementation: `deleteUser()` checks `public.admin_users` count and blocks deletion when it would leave fewer than 2 admins (manual test confirmed `?error=cannot_delete_last_admin`).
-#### J.7 - "Remove my presence" without deleting auth account [Not implemented] [Not tested]
-Implementation: Add an action to deactivate the admin's card (and optionally anonymize profile/card fields) while keeping the auth user and `admin_users` row intact.
 #### J.8 - Delete user's Storage files on user delete [Implemented] [Tested]
 Implementation: `deleteUser()` lists and removes `avatars/<user_id>/*` via service-role storage client before deleting the auth user (manual test confirmed).
 #### J.9 - Blocking a user must not lock admins out of `/admin` [Implemented] [Tested]
