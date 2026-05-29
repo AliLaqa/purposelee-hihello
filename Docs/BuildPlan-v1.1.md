@@ -46,4 +46,5 @@ Implementation: Update the admin’s `cards` row to set `is_active=false` (do no
 Implementation: Update the admin’s `cards` row to set `is_active=true` so the existing card + avatar come back without re-uploading.
 #### B.3 - Add admin UI entrypoint + confirmations [Not implemented] [Not tested]
 Implementation: Add a “Remove presence” / “Restore presence” action in `/admin` for the current admin with a clear warning/confirm step.
+#### B.4 - Record actions in `audit_events` [Not implemented] [Not tested]
 Implementation: Insert audit events like `admin.remove_presence` / `admin.restore_presence` with minimal metadata (what changed).
