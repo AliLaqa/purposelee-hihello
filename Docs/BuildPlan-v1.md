@@ -88,25 +88,25 @@ Implementation: `requireAdmin()` checks `public.admin_users` (allowlist) before 
 #### D.4 - Ensure admin can also use normal user flows [Implemented] [Tested]
 Implementation: Admins use the same credentials; only `/admin` is guarded by allowlist, normal `/dashboard` remains accessible.
 
-### Step E - Card editor (create/edit) [Implemented]
+### Step E - Card editor (create/edit) [Implemented] [Partially tested]
 Implementation: Card editor is in `/dashboard/card` with a server action that inserts/updates `public.cards` for the current user.
-#### E.1 - Create dashboard page for card creation/edit [Implemented]
+#### E.1 - Create dashboard page for card creation/edit [Implemented] [Tested]
 Implementation: `/dashboard` and `/dashboard/card` are implemented in `src/app/dashboard/page.tsx` and `src/app/dashboard/card/page.tsx`.
-#### E.2 - Implement slug creation + validation rules [Implemented]
+#### E.2 - Implement slug creation + validation rules [Implemented] [Tested]
 Implementation: `slugify()` and `isValidSlug()` live in `src/lib/cards/slug.ts` and are enforced in the card save action.
-#### E.3 - Save card data to Supabase [Implemented]
+#### E.3 - Save card data to Supabase [Implemented] [Tested]
 Implementation: `upsertCard()` in `src/app/dashboard/card/actions.ts` uses Supabase SSR client to insert/update the user's card.
-#### E.4 - Enforce card count limit per user (start at 1; optionally cap at 3) [Implemented]
-Implementation: One-card-per-user is enforced via DB unique index `uniq_cards_user_id` (not via an RLS self-query).
+#### E.4 - Enforce card count limit per user (start at 1; optionally cap at 3) [Implemented] [Partially tested]
+Implementation: One-card-per-user is enforced via DB unique index `uniq_cards_user_id` (UI does not expose multi-card creation; DB-level enforcement not manually forced/tested yet).
 
-### Step F - Image upload [Implemented]
+### Step F - Image upload [Implemented] [Partially tested]
 Implementation: Images upload to the `avatars` bucket using the user-id folder path convention and are read via public URL.
-#### F.1 - Upload image to Supabase Storage [Implemented]
+#### F.1 - Upload image to Supabase Storage [Implemented] [Tested]
 Implementation: `upsertCard()` uploads the selected file to `avatars` at `${userId}/{uuid}.ext` (no overwrite/upsert required).
-#### F.2 - Store image reference (path/url) on the card record [Implemented]
+#### F.2 - Store image reference (path/url) on the card record [Implemented] [Tested]
 Implementation: The Storage object path is stored in `cards.avatar_path` and reused for subsequent renders.
-#### F.3 - Display image in editor preview + public card page [Implemented]
-Implementation: Both pages call `supabase.storage.from('avatars').getPublicUrl(avatar_path)` and render the resulting URL.
+#### F.3 - Display image in editor preview + public card page [Implemented] [Partially tested]
+Implementation: Preview + public render work; file-type filtering and rename cases were tested, but very large (8–20MB) upload limits were not fully verified.
 
 ### Step G - Public card page [Implemented]
 Implementation: `/card/[slug]` reads card data by slug with public RLS access and renders a mobile-friendly card view.

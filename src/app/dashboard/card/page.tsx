@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth/guards";
 import { upsertCard } from "./actions";
+import AvatarField from "@/components/cards/avatar_field";
 
 export const dynamic = "force-dynamic";
 
@@ -109,29 +110,7 @@ export default async function CardEditorPage(props: {
         className="mt-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6"
       >
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="grid gap-1 sm:col-span-2">
-            <span className="text-xs font-medium text-[var(--color-muted)]">
-              Photo / Logo
-            </span>
-            <div className="flex items-center gap-4">
-              <div className="h-14 w-14 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]">
-                {avatarUrlData?.publicUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={avatarUrlData.publicUrl}
-                    alt="Avatar"
-                    className="h-full w-full object-cover"
-                  />
-                ) : null}
-              </div>
-              <input
-                type="file"
-                name="avatar"
-                accept="image/*"
-                className="text-sm"
-              />
-            </div>
-          </label>
+          <AvatarField initialUrl={avatarUrlData?.publicUrl ?? null} />
 
           <label className="grid gap-1">
             <span className="text-xs font-medium text-[var(--color-muted)]">
