@@ -117,25 +117,27 @@ Implementation: Missing/blocked cards return `notFound()` and public visibility 
 #### G.3 - Add basic SEO metadata [Implemented] [Tested]
 Implementation: Base app metadata is set in `src/app/layout.tsx` (title/description/viewport). Rich Open Graph/Twitter previews for `/card/[slug]` are deferred to v1.1.
 
-### Step H - Sharing (link + QR + email) [Implemented]
+### Step H - Sharing (link + QR + email) [Implemented] [Partially tested]
 Implementation: Sharing actions are client-side in `src/components/share/share_actions.tsx` and use the public card URL.
-#### H.1 - Add copy-link button [Implemented]
+#### H.1 - Add copy-link button [Implemented] [Tested]
 Implementation: Copy uses `navigator.clipboard` when available with fallbacks for insecure contexts (execCommand/prompt).
-#### H.2 - Add Web Share API support (fallback to copy) [Implemented]
+#### H.2 - Add Web Share API support (fallback to copy) [Implemented] [Partially tested]
 Implementation: If `navigator.share` exists, a Share button calls `navigator.share({ title, url })`.
-#### H.3 - Generate QR code from public URL [Implemented]
+Testing note: Full validation requires HTTPS (test after Vercel deployment / custom domain).
+#### H.3 - Generate QR code from public URL [Implemented] [Tested]
 Implementation: `react-qr-code` renders a QR for `NEXT_PUBLIC_SITE_URL + /card/<slug>` in `src/app/card/[slug]/page.tsx`.
-#### H.4 - Add email share via `mailto:` with prefilled subject/body [Implemented]
+#### H.4 - Add email share via `mailto:` with prefilled subject/body [Implemented] [Tested]
 Implementation: Mailto is generated client-side with `subject` + `body` containing the public link.
 
-### Step I - vCard download [Implemented]
+### Step I - vCard download [Implemented] [Partially tested]
 Implementation: vCard content is generated server-side from DB data and returned as an attachment for phone import.
-#### I.1 - Generate `.vcf` from card fields [Implemented]
+#### I.1 - Generate `.vcf` from card fields [Implemented] [Tested]
 Implementation: `src/lib/cards/vcard.ts` builds a vCard 3.0 string from name/company/email/phone.
-#### I.2 - Add "Save contact" / download action on the card page [Implemented]
+#### I.2 - Add "Save contact" / download action on the card page [Implemented] [Tested]
 Implementation: Button links to `src/app/card/[slug]/vcard/route.ts`, which returns the `.vcf` with download headers.
-#### I.3 - Verify import works on iOS/Android [Implemented]
+#### I.3 - Verify import works on iOS/Android [Implemented] [Partially tested]
 Implementation: Manual test completed (downloaded `.vcf` opens as contact card on mobile and can be saved).
+Testing note: Verified on Android; iOS import validation is pending.
 
 ### Step J - Admin dashboard (minimum) [Implemented] [Tested]
 Implementation: `/admin` uses a service-role Supabase client (server-only) and an allowlist table `public.admin_users`.
@@ -151,9 +153,9 @@ Implementation: Admin list shows user's first card slug/name and links to the pu
 Implementation: UI hides Delete for the current admin and `deleteUser()` rejects self-deletes server-side (manual request replay confirmed redirect to `?error=self_delete_not_allowed`).
 #### J.6 - Prevent reducing admins below 2 [Implemented] [Tested]
 Implementation: `deleteUser()` checks `public.admin_users` count and blocks deletion when it would leave fewer than 2 admins (manual test confirmed `?error=cannot_delete_last_admin`).
-#### J.8 - Delete user's Storage files on user delete [Implemented] [Tested]
+#### J.7 - Delete user's Storage files on user delete [Implemented] [Tested]
 Implementation: `deleteUser()` lists and removes `avatars/<user_id>/*` via service-role storage client before deleting the auth user (manual test confirmed).
-#### J.9 - Blocking a user must not lock admins out of `/admin` [Implemented] [Tested]
+#### J.8 - Blocking a user must not lock admins out of `/admin` [Implemented] [Tested]
 Implementation: `requireAdmin()` allows access for allowlisted admins even if their `profiles.is_blocked` is true, and the login action permits blocked admins when using "Admin login"; `requireUser()` continues to block normal user access.
 
 ### Step K - Polish and guardrails [Partially implemented]
