@@ -131,3 +131,8 @@ Implementation: Set `openGraph` metadata including `title`, `description`, `url`
 Implementation: Set `twitter` metadata (`summary`/`summary_large_image`) aligned with Open Graph fields.
 #### I.4 - Handle missing avatar / missing card safely [Not implemented] [Not tested]
 Implementation: Use a default image or omit `images`; fall back to generic metadata for not-found/inactive cards.
+
+### Step J - Basic abuse controls on public endpoints (minimal) [Not implemented]
+Implementation: Add minimal throttling/rate limiting for public/semi-public routes (e.g., `/card/[slug]` and vCard download) to reduce spam/abuse risk when deployed.
+#### J.1 - Add minimal IP-based throttling (middleware or edge) [Not implemented] [Not tested]
+Implementation: Apply a simple per-IP request limit with short windows, returning 429 for bursts; scope only to public routes to avoid breaking normal internal usage.

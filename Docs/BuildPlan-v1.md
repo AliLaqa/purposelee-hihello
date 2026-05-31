@@ -158,14 +158,12 @@ Implementation: `deleteUser()` lists and removes `avatars/<user_id>/*` via servi
 #### J.8 - Blocking a user must not lock admins out of `/admin` [Implemented] [Tested]
 Implementation: `requireAdmin()` allows access for allowlisted admins even if their `profiles.is_blocked` is true, and the login action permits blocked admins when using "Admin login"; `requireUser()` continues to block normal user access.
 
-### Step K - Polish and guardrails [Partially implemented]
+### Step K - Polish and guardrails [Implemented] [Tested]
 Implementation: UI uses a small tokenized palette and basic states; additional production hardening (rate limits) is deferred.
-#### K.1 - Mobile layout checks + UI polish [Implemented]
+#### K.1 - Mobile layout checks + UI polish [Implemented] [Tested]
 Implementation: Public card and editor layouts were verified on mobile (QR open + responsive layout).
-#### K.2 - Loading/error/empty states [Implemented]
+#### K.2 - Loading/error/empty states [Implemented] [Tested]
 Implementation: Auth and card editor render friendly error messages and show "No card yet" empty state on `/dashboard`.
-#### K.3 - Basic abuse controls on public endpoints (minimal) [Not implemented]
-Implementation: Not added in v1; can be implemented via simple IP throttling or middleware-based limits if needed.
 
 ### Step L - Deployment + smoke test [Partially implemented]
 Implementation: Local end-to-end testing is complete; Vercel deployment configuration is pending.
