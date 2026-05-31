@@ -108,14 +108,14 @@ Implementation: The Storage object path is stored in `cards.avatar_path` and reu
 #### F.3 - Display image in editor preview + public card page [Implemented] [Partially tested]
 Implementation: Preview + public render work; file-type filtering and rename cases were tested, but very large (8–20MB) upload limits were not fully verified.
 
-### Step G - Public card page [Implemented]
+### Step G - Public card page [Implemented] [Tested]
 Implementation: `/card/[slug]` reads card data by slug with public RLS access and renders a mobile-friendly card view.
-#### G.1 - Implement `/card/[slug]` route rendering card data [Implemented]
+#### G.1 - Implement `/card/[slug]` route rendering card data [Implemented] [Tested]
 Implementation: `src/app/card/[slug]/page.tsx` queries `public.cards` by `slug` and renders details + QR + actions.
-#### G.2 - Handle not-found / disabled-card scenarios [Implemented]
+#### G.2 - Handle not-found / disabled-card scenarios [Implemented] [Tested]
 Implementation: Missing/blocked cards return `notFound()` and public visibility is controlled by `cards.is_active` + RLS.
-#### G.3 - Add basic SEO + Open Graph metadata [Partially implemented]
-Implementation: Base app metadata is set in `src/app/layout.tsx`; OG/image metadata for `/card/[slug]` is not customized in v1.
+#### G.3 - Add basic SEO metadata [Implemented] [Tested]
+Implementation: Base app metadata is set in `src/app/layout.tsx` (title/description/viewport). Rich Open Graph/Twitter previews for `/card/[slug]` are deferred to v1.1.
 
 ### Step H - Sharing (link + QR + email) [Implemented]
 Implementation: Sharing actions are client-side in `src/components/share/share_actions.tsx` and use the public card URL.

@@ -12,6 +12,7 @@ MyHello v1.1 is a small follow-up release after v1, focused on **operational/adm
 - **Card cap control:** System enforces a configurable per-user card limit both in the app layer and in the database layer.
 - **Card removal UX:** Users/admins can remove cards with explicit confirmation and clear post-delete behavior.
 - **Admin identity clarity:** Admin dashboard shows who is signed in (email + optional display name).
+- **Share preview quality:** Shared public card links render correct Open Graph / Twitter previews (title/description/image) on common platforms.
 
 ## Functionalities (v1.1)
 - **Admin orphaned Storage cleanup**: Admin dashboard can scan Supabase Storage (`avatars`) for orphaned files, display exact identifiers (user UUID/folder + full object paths), and delete selected or all orphaned files after confirmation.
@@ -23,6 +24,7 @@ MyHello v1.1 is a small follow-up release after v1, focused on **operational/adm
 - **Admin sign-out from `/admin`**: Provide a sign-out button/action directly in the admin dashboard header.
 - **Separate auth pages (Sign in / Sign up)**: Split the combined `/auth` page into dedicated Sign in and Sign up pages for a clearer UX.
 - **Admin-only invitations (no public signup)**: Only invited users can create accounts; disable open/public signup.
+- **Open Graph link previews**: Public card links (`/card/[slug]`) produce rich previews (title/description/image) on chat/social apps.
 
 ## What NOT to implement (out of scope for v1.1)
 - Auto-scheduled background cleanup jobs / cron-based deletion
@@ -118,3 +120,14 @@ Implementation: Modify signup to require an invite token tied to the email; refu
 Implementation: Start with copyable invite link (no provider); later swap to SMTP/provider if needed.
 #### H.5 - Audit invite actions [Not implemented] [Not tested]
 Implementation: Record `admin.create_invite`, `admin.revoke_invite`, `invite.accepted` in `audit_events`.
+
+### Step I - Open Graph / Twitter metadata for public cards [Not implemented]
+Implementation: Add dynamic metadata generation for `/card/[slug]` so shared links display rich previews (title/description/image) in chat/social platforms.
+#### I.1 - Implement `generateMetadata()` for `/card/[slug]` [Not implemented] [Not tested]
+Implementation: Fetch card data by `slug` and generate `title`/`description` dynamically.
+#### I.2 - Add Open Graph (`og:*`) metadata [Not implemented] [Not tested]
+Implementation: Set `openGraph` metadata including `title`, `description`, `url`, and `images` when an avatar exists.
+#### I.3 - Add Twitter card metadata [Not implemented] [Not tested]
+Implementation: Set `twitter` metadata (`summary`/`summary_large_image`) aligned with Open Graph fields.
+#### I.4 - Handle missing avatar / missing card safely [Not implemented] [Not tested]
+Implementation: Use a default image or omit `images`; fall back to generic metadata for not-found/inactive cards.
