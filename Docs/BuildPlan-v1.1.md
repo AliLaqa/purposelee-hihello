@@ -13,6 +13,7 @@ MyHello v1.1 is a small follow-up release after v1, focused on **operational/adm
 - **Card removal UX:** Users/admins can remove cards with explicit confirmation and clear post-delete behavior.
 - **Admin identity clarity:** Admin dashboard shows who is signed in (email + optional display name).
 - **Share preview quality:** Shared public card links render correct Open Graph / Twitter previews (title/description/image) on common platforms.
+- **Account recovery:** Users can request a password reset and successfully set a new password via an in-app flow (Supabase-hosted email + app page).
 
 ## Functionalities (v1.1)
 - **Admin orphaned Storage cleanup**: Admin dashboard can scan Supabase Storage (`avatars`) for orphaned files, display exact identifiers (user UUID/folder + full object paths), and delete selected or all orphaned files after confirmation.
@@ -25,6 +26,7 @@ MyHello v1.1 is a small follow-up release after v1, focused on **operational/adm
 - **Separate auth pages (Sign in / Sign up)**: Split the combined `/auth` page into dedicated Sign in and Sign up pages for a clearer UX.
 - **Admin-only invitations (no public signup)**: Only invited users can create accounts; disable open/public signup.
 - **Open Graph link previews**: Public card links (`/card/[slug]`) produce rich previews (title/description/image) on chat/social apps.
+- **Password reset (account recovery)**: Add a "Forgot password" flow so users can reset their password via email and set a new password in the app (no admin intervention).
 
 ## What NOT to implement (out of scope for v1.1)
 - Auto-scheduled background cleanup jobs / cron-based deletion
@@ -136,3 +138,14 @@ Implementation: Use a default image or omit `images`; fall back to generic metad
 Implementation: Add minimal throttling/rate limiting for public/semi-public routes (e.g., `/card/[slug]` and vCard download) to reduce spam/abuse risk when deployed.
 #### J.1 - Add minimal IP-based throttling (middleware or edge) [Not implemented] [Not tested]
 Implementation: Apply a simple per-IP request limit with short windows, returning 429 for bursts; scope only to public routes to avoid breaking normal internal usage.
+
+### Step K - Password reset (account recovery) [Not implemented]
+Implementation: Add a standard "Forgot password" flow using Supabase password reset emails and an in-app reset page for setting a new password.
+#### K.1 - Add "Forgot password?" link + reset request form [Not implemented] [Not tested]
+Implementation: On Sign in, add a link to a reset request page where the user enters email; call `supabase.auth.resetPasswordForEmail(...)` with `redirectTo` pointing back to the app.
+#### K.2 - Add reset password page to set a new password [Not implemented] [Not tested]
+Implementation: Create a reset page that accepts the recovery session and submits `supabase.auth.updateUser({ password })`, then redirects to Sign in with a success message.
+#### K.3 - Configure Supabase redirect URLs for password recovery [Not implemented] [Not tested]
+Implementation: Ensure Supabase Auth URL Configuration allows the deployed app URL and the recovery redirect path(s) so the reset link returns to the correct page.
+#### K.4 - Manual test (Android + iOS) [Not implemented] [Not tested]
+Implementation: Verify reset email arrives, link opens the reset page, password updates successfully, and the user can sign in with the new password.
