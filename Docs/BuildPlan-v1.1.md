@@ -27,6 +27,9 @@ MyHello v1.1 is a small follow-up release after v1, focused on **operational/adm
 - **Admin-only invitations (no public signup)**: Only invited users can create accounts; disable open/public signup.
 - **Open Graph link previews**: Public card links (`/card/[slug]`) produce rich previews (title/description/image) on chat/social apps.
 - **Password reset (account recovery)**: Add a "Forgot password" flow so users can reset their password via email and set a new password in the app (no admin intervention).
+- **Image upload size limits**: Add explicit avatar/photo size validation so oversized uploads are rejected with a clear message.
+- **iOS vCard validation**: Verify `.vcf` import behavior on iOS in addition to the Android validation already completed in v1.
+- **Production observability hardening**: Configure runtime error tracking and expand auditable events without storing raw stack traces or request bodies.
 
 ## What NOT to implement (out of scope for v1.1)
 - Auto-scheduled background cleanup jobs / cron-based deletion
@@ -73,6 +76,8 @@ Implementation: In the card creation flow, query the current user’s card count
 Implementation: Add a DB trigger/function to prevent inserts beyond the cap (defense-in-depth; avoids bypass via direct API calls).
 #### C.4 - Add tests / manual verification checklist [Not implemented] [Not tested]
 Implementation: Verify user can create up to N cards, cannot create N+1, and that separate users each get their own cap.
+#### C.5 - Verify DB-layer card cap cannot be bypassed [Not implemented] [Not tested]
+Implementation: Manually attempt direct/forced card creation beyond the configured cap and confirm the database rejects it.
 
 ### Step D - Card deletion (User + Admin) [Not implemented]
 Implementation: Add explicit delete/deactivate flows for cards without deleting the underlying auth user (admin can delete a user’s card independently).
@@ -149,3 +154,26 @@ Implementation: Create a reset page that accepts the recovery session and submit
 Implementation: Ensure Supabase Auth URL Configuration allows the deployed app URL and the recovery redirect path(s) so the reset link returns to the correct page.
 #### K.4 - Manual test (Android + iOS) [Not implemented] [Not tested]
 Implementation: Verify reset email arrives, link opens the reset page, password updates successfully, and the user can sign in with the new password.
+
+### Step L - Image upload size limits [Not implemented]
+Implementation: Add explicit image size guardrails for avatar/logo uploads so large files are blocked before they create Storage or UX issues.
+#### L.1 - Define maximum allowed avatar/logo file size [Not implemented] [Not tested]
+Implementation: Choose a practical max size for v1.1 (for example 5MB or 10MB) and document it in the upload UI.
+#### L.2 - Enforce size limit before upload [Not implemented] [Not tested]
+Implementation: Reject oversized image files in the card save flow with a clear user-facing error before attempting Storage upload.
+#### L.3 - Manual test large image rejection [Not implemented] [Not tested]
+Implementation: Test with an image larger than the configured limit and confirm the card data is not saved with a failed/partial upload.
+
+### Step M - iOS vCard validation [Not implemented]
+Implementation: Validate that downloaded `.vcf` files import correctly on iOS Contacts, matching the Android behavior verified in v1.
+#### M.1 - Test vCard download on iOS browser [Not implemented] [Not tested]
+Implementation: Open a public card on iOS Safari/Chrome, download the vCard, and confirm iOS opens the contact import screen.
+#### M.2 - Verify imported iOS contact fields [Not implemented] [Not tested]
+Implementation: Confirm name, company, email, and phone are populated correctly after import.
+
+### Step N - Production observability hardening [Not implemented]
+Implementation: Finish production-grade observability by configuring runtime error tracking and expanding audit-event coverage while keeping sensitive/debug data out of Postgres.
+#### N.1 - Configure runtime error tracking in production [Not implemented] [Not tested]
+Implementation: Add a production `SENTRY_DSN` (or equivalent provider DSN) in Vercel and verify client/server exceptions are captured with useful context.
+#### N.2 - Expand DB audit events only for auditable product actions [Not implemented] [Not tested]
+Implementation: Add audit rows for selected important actions beyond existing admin events, while continuing to avoid raw stack traces, request bodies, and sensitive data.
