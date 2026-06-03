@@ -146,16 +146,17 @@ Implementation: Add minimal throttling/rate limiting for public/semi-public rout
 #### J.1 - Add minimal IP-based throttling (middleware or edge) [Not implemented] [Not tested]
 Implementation: Apply a simple per-IP request limit with short windows, returning 429 for bursts; scope only to public routes to avoid breaking normal internal usage.
 
-### Step K - Password reset (account recovery) [Implemented]
+### Step K - Password reset (account recovery) [Implemented] [Partially tested]
 Implementation: Add a standard "Forgot password" flow using Supabase password reset emails and an in-app reset page for setting a new password.
-#### K.1 - Add "Forgot password?" link + reset request form [Implemented] [Not tested]
+#### K.1 - Add "Forgot password?" link + reset request form [Implemented] [Tested]
 Implementation: On Sign in, add a link to a reset request page where the user enters email; call `supabase.auth.resetPasswordForEmail(...)` with `redirectTo` pointing back to the app.
-#### K.2 - Add reset password page to set a new password [Implemented] [Not tested]
+#### K.2 - Add reset password page to set a new password [Implemented] [Tested]
 Implementation: Create a reset page that accepts the recovery session and submits `supabase.auth.updateUser({ password })`, then redirects to Sign in with a success message.
-#### K.3 - Configure Supabase redirect URLs for password recovery [Implemented] [Not tested]
+#### K.3 - Configure Supabase redirect URLs for password recovery [Implemented] [Tested]
 Implementation: Ensure Supabase Auth URL Configuration allows the deployed app URL and the recovery redirect path(s) so the reset link returns to the correct page.
-#### K.4 - Manual test (Android + iOS) [Implemented] [Not tested]
+#### K.4 - Manual test (Android + iOS) [Implemented] [Partially tested]
 Implementation: Verify reset email arrives, link opens the reset page, password updates successfully, and the user can sign in with the new password.
+Testing note: Desktop/browser reset flow passed locally; Android and iOS password-reset validation are still pending.
 
 ### Step L - Image upload size limits [Not implemented]
 Implementation: Add explicit image size guardrails for avatar/logo uploads so large files are blocked before they create Storage or UX issues.
@@ -179,6 +180,8 @@ Implementation: Finish production-grade observability by configuring runtime err
 Implementation: Add a production `SENTRY_DSN` (or equivalent provider DSN) in Vercel and verify client/server exceptions are captured with useful context.
 #### N.2 - Expand DB audit events only for auditable product actions [Not implemented] [Not tested]
 Implementation: Add audit rows for selected important actions beyond existing admin events, while continuing to avoid raw stack traces, request bodies, and sensitive data.
+#### N.3 - Remove verbose password-reset debug logs before production deploy [Not implemented] [Not tested]
+Implementation: Before Vercel production deployment, remove/reduce temporary password-reset diagnostic logs while keeping the dynamic-origin reset logic and callback cookie handling.
 
 ### Step O - Deleted-user stale session guard [Implemented] [Tested]
 Implementation: Fix authenticated route guards so users deleted from Supabase Auth/Profile cannot keep using `/dashboard` or `/dashboard/card` through an old browser session.

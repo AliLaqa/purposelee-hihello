@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -14,6 +15,41 @@ function getSiteUrl(): string {
 function getNextPath(formData: FormData) {
   const loginMode = String(formData.get("login_mode") || "user");
   return loginMode === "admin" ? "/admin" : "/dashboard";
+}
+
+function maskEmail(email: string) {
+  const [local, domain] = email.split("@");
+  if (!local || !domain) return "(invalid email)";
+  return `${local.slice(0, 2)}***@${domain}`;
+}
+
+async function getRequestLogContext() {
+  const requestHeaders = await headers();
+  return {
+    host: requestHeaders.get("host"),
+    origin: requestHeaders.get("origin"),
+    referer: requestHeaders.get("referer"),
+    forwardedHost: requestHeaders.get("x-forwarded-host"),
+    forwardedProto: requestHeaders.get("x-forwarded-proto"),
+  };
+}
+
+async function getRequestOrigin() {
+  const requestHeaders = await headers();
+  const explicitOrigin = requestHeaders.get("origin");
+  if (explicitOrigin) {
+    return explicitOrigin.replace(/\/+$/, "");
+  }
+
+  const host =
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  const proto = requestHeaders.get("x-forwarded-proto") ?? "http";
+
+  if (host) {
+    return `${proto}://${host}`.replace(/\/+$/, "");
+  }
+
+  return getSiteUrl();
 }
 
 export async function login(formData: FormData) {
@@ -135,9 +171,28 @@ export async function requestPasswordReset(formData: FormData) {
     redirect("/auth/forgot-password?error=missing_email");
   }
 
-  await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${getSiteUrl()}/auth/callback?next=/auth/reset-password`,
+  const requestOrigin = await getRequestOrigin();
+  const redirectTo = `${requestOrigin}/auth/callback?next=/auth/reset-password`;
+  console.log("Password reset requested", {
+    email: maskEmail(email),
+    siteUrl: getSiteUrl(),
+    requestOrigin,
+    redirectTo,
+    request: await getRequestLogContext(),
   });
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+
+  if (error) {
+    console.error("Password reset email request failed", {
+      code: "code" in error && typeof error.code === "string" ? error.code : "",
+      message: error.message,
+      status: "status" in error ? error.status : undefined,
+      request: await getRequestLogContext(),
+    });
+  }
 
   redirect("/auth/forgot-password?sent=1");
 }
@@ -160,10 +215,37 @@ export async function updatePassword(formData: FormData) {
     redirect("/auth/reset-password?error=password_mismatch");
   }
 
+  const { data: existingUser, error: existingUserError } =
+    await supabase.auth.getUser();
+
+  console.log("Password update attempted", {
+    hasSessionUser: Boolean(existingUser.user),
+    sessionUserId: existingUser.user?.id ?? null,
+    sessionCheckError: existingUserError
+      ? {
+          code:
+            "code" in existingUserError &&
+            typeof existingUserError.code === "string"
+              ? existingUserError.code
+              : "",
+          message: existingUserError.message,
+          status: "status" in existingUserError ? existingUserError.status : undefined,
+        }
+      : null,
+    request: await getRequestLogContext(),
+  });
+
   const { error } = await supabase.auth.updateUser({ password });
   if (error) {
     const code =
       "code" in error && typeof error.code === "string" ? error.code : "";
+
+    console.error("Password update failed", {
+      code,
+      message: error.message,
+      status: "status" in error ? error.status : undefined,
+    });
+
     redirect(
       `/auth/reset-password?error=update_failed${
         code ? `&code=${encodeURIComponent(code)}` : ""
