@@ -10,12 +10,13 @@ type RequireUserOptions = {
 export async function requireUser(options: RequireUserOptions = {}) {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims?.sub) {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) {
+    await supabase.auth.signOut();
     redirect("/auth");
   }
 
-  const userId = data.claims.sub;
+  const userId = data.user.id;
 
   let { data: profile } = await supabase
     .from("profiles")
@@ -25,8 +26,15 @@ export async function requireUser(options: RequireUserOptions = {}) {
 
   if (!profile && getSupabaseSecretKey()) {
     const admin = createAdminClient();
-    const { data: authUser } = await admin.auth.admin.getUserById(userId);
-    const email = authUser.user?.email ?? "";
+    const { data: authUser, error: authUserError } =
+      await admin.auth.admin.getUserById(userId);
+
+    if (authUserError || !authUser.user) {
+      await supabase.auth.signOut();
+      redirect("/auth");
+    }
+
+    const email = authUser.user.email ?? data.user.email ?? "";
 
     await admin
       .from("profiles")
@@ -38,6 +46,11 @@ export async function requireUser(options: RequireUserOptions = {}) {
       .eq("id", userId)
       .maybeSingle();
     profile = res.data ?? null;
+  }
+
+  if (!profile) {
+    await supabase.auth.signOut();
+    redirect("/auth");
   }
 
   if (profile?.is_blocked) {

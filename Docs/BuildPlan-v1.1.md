@@ -180,13 +180,13 @@ Implementation: Add a production `SENTRY_DSN` (or equivalent provider DSN) in Ve
 #### N.2 - Expand DB audit events only for auditable product actions [Not implemented] [Not tested]
 Implementation: Add audit rows for selected important actions beyond existing admin events, while continuing to avoid raw stack traces, request bodies, and sensitive data.
 
-### Step O - Deleted-user stale session guard [Not implemented]
+### Step O - Deleted-user stale session guard [Implemented] [Tested]
 Implementation: Fix authenticated route guards so users deleted from Supabase Auth/Profile cannot keep using `/dashboard` or `/dashboard/card` through an old browser session.
-#### O.1 - Verify authenticated user still exists server-side [Not implemented] [Not tested]
+#### O.1 - Verify authenticated user still exists server-side [Implemented] [Tested]
 Implementation: Update the user guard to reject sessions when the current user no longer exists in Supabase Auth and no valid profile exists.
-#### O.2 - Sign out stale deleted-user sessions [Not implemented] [Not tested]
+#### O.2 - Sign out stale deleted-user sessions [Implemented] [Tested]
 Implementation: When a deleted/stale session is detected, clear the local Supabase session cookies and redirect to `/auth`.
-#### O.3 - Prevent profile recreation for deleted users [Not implemented] [Not tested]
+#### O.3 - Prevent profile recreation for deleted users [Implemented] [Tested]
 Implementation: Ensure missing profiles are recreated only when the corresponding Auth user still exists.
-#### O.4 - Manual test deleted-user session behavior [Not implemented] [Not tested]
+#### O.4 - Manual test deleted-user session behavior [Implemented] [Tested]
 Implementation: Delete a logged-in user from `/admin`, refresh their existing dashboard session, and confirm they are redirected to `/auth` instead of staying inside the app.
