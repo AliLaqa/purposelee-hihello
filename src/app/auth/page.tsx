@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { login, signup } from "./actions";
 import { getSupabasePublicConfig } from "@/lib/env";
 
@@ -7,6 +8,8 @@ type SearchParams = {
   error?: string;
   blocked?: string;
   code?: string;
+  invite?: string;
+  password_reset?: string;
 };
 
 export default async function AuthPage(props: {
@@ -16,6 +19,8 @@ export default async function AuthPage(props: {
   const error = searchParams.error;
   const blocked = searchParams.blocked === "1";
   const code = searchParams.code;
+  const inviteToken = searchParams.invite ?? "";
+  const passwordReset = searchParams.password_reset === "1";
   const isSupabaseConfigured = Boolean(getSupabasePublicConfig());
 
   return (
@@ -45,10 +50,24 @@ export default async function AuthPage(props: {
           </div>
         ) : null}
 
+        {passwordReset ? (
+          <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+            Password updated. Sign in with your new password.
+          </div>
+        ) : null}
+
         {error ? (
           <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
             {error === "missing_credentials"
               ? "Email and password are required."
+              : error === "invite_required"
+              ? "Signup requires an admin invite link."
+              : error === "invalid_invite"
+              ? "This invite is invalid, expired, or does not match that email."
+              : error === "invite_check_unavailable"
+              ? "Invite validation is not configured on the server."
+              : error === "auth_callback_failed"
+              ? "Unable to complete auth redirect. Try again."
               : error === "invalid_login"
               ? code === "email_not_confirmed"
                 ? "Email not confirmed yet. Check your inbox."
@@ -124,6 +143,12 @@ export default async function AuthPage(props: {
               >
                 Sign in
               </button>
+              <Link
+                href="/auth/forgot-password"
+                className="text-sm font-semibold text-[var(--color-text)] underline"
+              >
+                Forgot password?
+              </Link>
             </form>
           </section>
 
@@ -131,7 +156,13 @@ export default async function AuthPage(props: {
             <h2 className="text-sm font-semibold text-[var(--color-text)]">
               Create account
             </h2>
+            {!inviteToken ? (
+              <div className="mt-3 rounded-lg border border-[var(--color-border)] p-3 text-sm text-[var(--color-muted)]">
+                Signup is invite-only. Ask an admin for an invite link.
+              </div>
+            ) : (
             <form action={signup} className="mt-3 grid gap-3">
+              <input type="hidden" name="invite_token" value={inviteToken} />
               <label className="grid gap-1">
                 <span className="text-xs font-medium text-[var(--color-muted)]">
                   Email
@@ -161,6 +192,7 @@ export default async function AuthPage(props: {
                 Sign up
               </button>
             </form>
+            )}
           </section>
         </div>
       </div>

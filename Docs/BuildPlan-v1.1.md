@@ -14,6 +14,7 @@ MyHello v1.1 is a small follow-up release after v1, focused on **operational/adm
 - **Admin identity clarity:** Admin dashboard shows who is signed in (email + optional display name).
 - **Share preview quality:** Shared public card links render correct Open Graph / Twitter previews (title/description/image) on common platforms.
 - **Account recovery:** Users can request a password reset and successfully set a new password via an in-app flow (Supabase-hosted email + app page).
+- **Deleted-user session safety:** Deleted users cannot continue using dashboard/card routes through stale browser sessions.
 
 ## Functionalities (v1.1)
 - **Admin orphaned Storage cleanup**: Admin dashboard can scan Supabase Storage (`avatars`) for orphaned files, display exact identifiers (user UUID/folder + full object paths), and delete selected or all orphaned files after confirmation.
@@ -27,6 +28,7 @@ MyHello v1.1 is a small follow-up release after v1, focused on **operational/adm
 - **Admin-only invitations (no public signup)**: Only invited users can create accounts; disable open/public signup.
 - **Open Graph link previews**: Public card links (`/card/[slug]`) produce rich previews (title/description/image) on chat/social apps.
 - **Password reset (account recovery)**: Add a "Forgot password" flow so users can reset their password via email and set a new password in the app (no admin intervention).
+- **Deleted-user stale session fix**: Ensure deleted users are signed out and redirected when their old browser session tries to access authenticated routes.
 - **Image upload size limits**: Add explicit avatar/photo size validation so oversized uploads are rejected with a clear message.
 - **iOS vCard validation**: Verify `.vcf` import behavior on iOS in addition to the Android validation already completed in v1.
 - **Production observability hardening**: Configure runtime error tracking and expand auditable events without storing raw stack traces or request bodies.
@@ -79,29 +81,29 @@ Implementation: Verify user can create up to N cards, cannot create N+1, and tha
 #### C.5 - Verify DB-layer card cap cannot be bypassed [Not implemented] [Not tested]
 Implementation: Manually attempt direct/forced card creation beyond the configured cap and confirm the database rejects it.
 
-### Step D - Card deletion (User + Admin) [Not implemented]
+### Step D - Card deletion (User + Admin) [Implemented]
 Implementation: Add explicit delete/deactivate flows for cards without deleting the underlying auth user (admin can delete a user’s card independently).
-#### D.1 - Add user card delete/deactivate action + confirmation [Not implemented] [Not tested]
+#### D.1 - Add user card delete/deactivate action + confirmation [Implemented] [Not tested]
 Implementation: Add a “Delete card” (or “Deactivate card”) action in `/dashboard/card` with a confirmation prompt; define whether it hard-deletes the row or sets `is_active=false`.
-#### D.2 - Handle avatar cleanup on user card delete (optional) [Not implemented] [Not tested]
+#### D.2 - Handle avatar cleanup on user card delete (optional) [Implemented] [Not tested]
 Implementation: If hard-deleting a card, optionally remove `avatars/<user_id>/*` (or just the referenced `avatar_path`) so Storage doesn’t accumulate unused files.
-#### D.3 - Add admin action to delete a user’s card only (not the user) + confirmation [Not implemented] [Not tested]
+#### D.3 - Add admin action to delete a user’s card only (not the user) + confirmation [Implemented] [Not tested]
 Implementation: In `/admin`, add a “Delete card” action per user that deletes the card row (or deactivates it) without deleting the profile/auth user; confirm before applying.
-#### D.4 - Record card deletion actions in `audit_events` [Not implemented] [Not tested]
+#### D.4 - Record card deletion actions in `audit_events` [Implemented] [Not tested]
 Implementation: Insert audit events like `admin.delete_card` / `user.delete_card` with target card id/user id in metadata.
 
-### Step E - Admin identity in dashboard [Not implemented]
+### Step E - Admin identity in dashboard [Implemented] [Tested]
 Implementation: Display the currently logged-in admin identity (email + optional display name) and allow editing the display name.
-#### E.1 - Show “Signed in as” email in `/admin` header [Not implemented] [Not tested]
+#### E.1 - Show “Signed in as” email in `/admin` header [Implemented] [Tested]
 Implementation: Resolve the current admin’s email and show it near the page title/header.
-#### E.2 - Show display name (optional) and fall back to email [Not implemented] [Not tested]
+#### E.2 - Show display name (optional) and fall back to email [Implemented] [Tested]
 Implementation: If `profiles.display_name` is set, show it alongside the email; otherwise show email only.
-#### E.3 - Allow admin to update their `profiles.display_name` [Not implemented] [Not tested]
+#### E.3 - Allow admin to update their `profiles.display_name` [Implemented] [Tested]
 Implementation: Add a small inline edit form in `/admin` that updates `profiles.display_name` for the current admin.
 
-### Step F - Admin sign-out button [Not implemented]
+### Step F - Admin sign-out button [Implemented] [Tested]
 Implementation: Add a sign-out action/button to the `/admin` header so admins can log out without navigating to `/dashboard`.
-#### F.1 - Add sign-out button in `/admin` header [Not implemented] [Not tested]
+#### F.1 - Add sign-out button in `/admin` header [Implemented] [Tested]
 Implementation: Reuse the existing `signOut` server action and render a form/button in the admin header.
 
 ### Step G - Split auth page into Sign in / Sign up [Not implemented]
@@ -115,28 +117,28 @@ Implementation: Keep the “Admin login / Normal login” toggle on the Sign in 
 #### G.4 - Keep `/auth` as a redirect (optional) [Not implemented] [Not tested]
 Implementation: Optionally make `/auth` redirect to `/auth/sign-in` to preserve existing links/bookmarks.
 
-### Step H - Admin invitations + disable public signup [Not implemented]
+### Step H - Admin invitations + disable public signup [Implemented]
 Implementation: Add an admin invite flow so only invited users can sign up; block/disable open signup for everyone else.
-#### H.1 - Create `invites` table and policies [Not implemented] [Not tested]
+#### H.1 - Create `invites` table and policies [Implemented] [Not tested]
 Implementation: Add a table to store invite email, token, status, created_by admin id, and expiry; allow admin-only management.
-#### H.2 - Admin UI to create/revoke invites [Not implemented] [Not tested]
+#### H.2 - Admin UI to create/revoke invites [Implemented] [Not tested]
 Implementation: Add an “Invites” section in `/admin` to create an invite (email) and revoke it before use.
-#### H.3 - Signup flow requires valid invite token [Not implemented] [Not tested]
+#### H.3 - Signup flow requires valid invite token [Implemented] [Not tested]
 Implementation: Modify signup to require an invite token tied to the email; refuse signup when not invited.
-#### H.4 - Email delivery strategy (minimal) [Not implemented] [Not tested]
+#### H.4 - Email delivery strategy (minimal) [Implemented] [Not tested]
 Implementation: Start with copyable invite link (no provider); later swap to SMTP/provider if needed.
-#### H.5 - Audit invite actions [Not implemented] [Not tested]
+#### H.5 - Audit invite actions [Implemented] [Not tested]
 Implementation: Record `admin.create_invite`, `admin.revoke_invite`, `invite.accepted` in `audit_events`.
 
-### Step I - Open Graph / Twitter metadata for public cards [Not implemented]
+### Step I - Open Graph / Twitter metadata for public cards [Implemented]
 Implementation: Add dynamic metadata generation for `/card/[slug]` so shared links display rich previews (title/description/image) in chat/social platforms.
-#### I.1 - Implement `generateMetadata()` for `/card/[slug]` [Not implemented] [Not tested]
+#### I.1 - Implement `generateMetadata()` for `/card/[slug]` [Implemented] [Not tested]
 Implementation: Fetch card data by `slug` and generate `title`/`description` dynamically.
-#### I.2 - Add Open Graph (`og:*`) metadata [Not implemented] [Not tested]
+#### I.2 - Add Open Graph (`og:*`) metadata [Implemented] [Not tested]
 Implementation: Set `openGraph` metadata including `title`, `description`, `url`, and `images` when an avatar exists.
-#### I.3 - Add Twitter card metadata [Not implemented] [Not tested]
+#### I.3 - Add Twitter card metadata [Implemented] [Not tested]
 Implementation: Set `twitter` metadata (`summary`/`summary_large_image`) aligned with Open Graph fields.
-#### I.4 - Handle missing avatar / missing card safely [Not implemented] [Not tested]
+#### I.4 - Handle missing avatar / missing card safely [Implemented] [Not tested]
 Implementation: Use a default image or omit `images`; fall back to generic metadata for not-found/inactive cards.
 
 ### Step J - Basic abuse controls on public endpoints (minimal) [Not implemented]
@@ -144,15 +146,15 @@ Implementation: Add minimal throttling/rate limiting for public/semi-public rout
 #### J.1 - Add minimal IP-based throttling (middleware or edge) [Not implemented] [Not tested]
 Implementation: Apply a simple per-IP request limit with short windows, returning 429 for bursts; scope only to public routes to avoid breaking normal internal usage.
 
-### Step K - Password reset (account recovery) [Not implemented]
+### Step K - Password reset (account recovery) [Implemented]
 Implementation: Add a standard "Forgot password" flow using Supabase password reset emails and an in-app reset page for setting a new password.
-#### K.1 - Add "Forgot password?" link + reset request form [Not implemented] [Not tested]
+#### K.1 - Add "Forgot password?" link + reset request form [Implemented] [Not tested]
 Implementation: On Sign in, add a link to a reset request page where the user enters email; call `supabase.auth.resetPasswordForEmail(...)` with `redirectTo` pointing back to the app.
-#### K.2 - Add reset password page to set a new password [Not implemented] [Not tested]
+#### K.2 - Add reset password page to set a new password [Implemented] [Not tested]
 Implementation: Create a reset page that accepts the recovery session and submits `supabase.auth.updateUser({ password })`, then redirects to Sign in with a success message.
-#### K.3 - Configure Supabase redirect URLs for password recovery [Not implemented] [Not tested]
+#### K.3 - Configure Supabase redirect URLs for password recovery [Implemented] [Not tested]
 Implementation: Ensure Supabase Auth URL Configuration allows the deployed app URL and the recovery redirect path(s) so the reset link returns to the correct page.
-#### K.4 - Manual test (Android + iOS) [Not implemented] [Not tested]
+#### K.4 - Manual test (Android + iOS) [Implemented] [Not tested]
 Implementation: Verify reset email arrives, link opens the reset page, password updates successfully, and the user can sign in with the new password.
 
 ### Step L - Image upload size limits [Not implemented]
@@ -177,3 +179,14 @@ Implementation: Finish production-grade observability by configuring runtime err
 Implementation: Add a production `SENTRY_DSN` (or equivalent provider DSN) in Vercel and verify client/server exceptions are captured with useful context.
 #### N.2 - Expand DB audit events only for auditable product actions [Not implemented] [Not tested]
 Implementation: Add audit rows for selected important actions beyond existing admin events, while continuing to avoid raw stack traces, request bodies, and sensitive data.
+
+### Step O - Deleted-user stale session guard [Not implemented]
+Implementation: Fix authenticated route guards so users deleted from Supabase Auth/Profile cannot keep using `/dashboard` or `/dashboard/card` through an old browser session.
+#### O.1 - Verify authenticated user still exists server-side [Not implemented] [Not tested]
+Implementation: Update the user guard to reject sessions when the current user no longer exists in Supabase Auth and no valid profile exists.
+#### O.2 - Sign out stale deleted-user sessions [Not implemented] [Not tested]
+Implementation: When a deleted/stale session is detected, clear the local Supabase session cookies and redirect to `/auth`.
+#### O.3 - Prevent profile recreation for deleted users [Not implemented] [Not tested]
+Implementation: Ensure missing profiles are recreated only when the corresponding Auth user still exists.
+#### O.4 - Manual test deleted-user session behavior [Not implemented] [Not tested]
+Implementation: Delete a logged-in user from `/admin`, refresh their existing dashboard session, and confirm they are redirected to `/auth` instead of staying inside the app.

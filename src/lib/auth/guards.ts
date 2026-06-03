@@ -19,7 +19,7 @@ export async function requireUser(options: RequireUserOptions = {}) {
 
   let { data: profile } = await supabase
     .from("profiles")
-    .select("id,is_blocked,email")
+    .select("id,is_blocked,email,display_name")
     .eq("id", userId)
     .maybeSingle();
 
@@ -34,7 +34,7 @@ export async function requireUser(options: RequireUserOptions = {}) {
 
     const res = await supabase
       .from("profiles")
-      .select("id,is_blocked,email")
+      .select("id,is_blocked,email,display_name")
       .eq("id", userId)
       .maybeSingle();
     profile = res.data ?? null;

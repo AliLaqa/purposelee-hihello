@@ -2,6 +2,14 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getSupabaseSecretKey } from "@/lib/env";
+
+function getSiteUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL;
+  if (configured) return configured.replace(/\/+$/, "");
+  return "http://localhost:3000";
+}
 
 function getNextPath(formData: FormData) {
   const loginMode = String(formData.get("login_mode") || "user");
@@ -54,14 +62,40 @@ export async function signup(formData: FormData) {
   const supabase = await createClient();
 
   const email = String(formData.get("email") || "").trim();
+  const normalizedEmail = email.toLowerCase();
   const password = String(formData.get("password") || "");
+  const inviteToken = String(formData.get("invite_token") || "").trim();
 
   if (!email || !password) {
     redirect("/auth?error=missing_credentials");
   }
 
+  if (!inviteToken) {
+    redirect("/auth?error=invite_required");
+  }
+
+  if (!getSupabaseSecretKey()) {
+    redirect("/auth?error=invite_check_unavailable");
+  }
+
+  const admin = createAdminClient();
+  const { data: invite } = await admin
+    .from("invites")
+    .select("id,email,status,expires_at,created_by")
+    .eq("token", inviteToken)
+    .maybeSingle();
+
+  if (
+    !invite ||
+    invite.status !== "pending" ||
+    String(invite.email).toLowerCase() !== normalizedEmail ||
+    (invite.expires_at && new Date(invite.expires_at).getTime() < Date.now())
+  ) {
+    redirect("/auth?error=invalid_invite");
+  }
+
   const { data, error } = await supabase.auth.signUp({
-    email,
+    email: normalizedEmail,
     password,
   });
 
@@ -73,7 +107,72 @@ export async function signup(formData: FormData) {
     redirect(`/auth?error=signup_failed${code ? `&code=${encodeURIComponent(code)}` : ""}`);
   }
 
+  await admin
+    .from("invites")
+    .update({
+      status: "accepted",
+      accepted_user_id: data.user.id,
+      accepted_at: new Date().toISOString(),
+    })
+    .eq("id", invite.id);
+
+  await admin.from("audit_events").insert({
+    actor_user_id: data.user.id,
+    action: "invite.accepted",
+    target_type: "invite",
+    target_id: invite.id,
+    metadata: { email: normalizedEmail, created_by: invite.created_by },
+  });
+
   redirect("/dashboard");
+}
+
+export async function requestPasswordReset(formData: FormData) {
+  const supabase = await createClient();
+
+  const email = String(formData.get("email") || "").trim();
+  if (!email) {
+    redirect("/auth/forgot-password?error=missing_email");
+  }
+
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${getSiteUrl()}/auth/callback?next=/auth/reset-password`,
+  });
+
+  redirect("/auth/forgot-password?sent=1");
+}
+
+export async function updatePassword(formData: FormData) {
+  const supabase = await createClient();
+
+  const password = String(formData.get("password") || "");
+  const confirmPassword = String(formData.get("confirm_password") || "");
+
+  if (!password || !confirmPassword) {
+    redirect("/auth/reset-password?error=missing_password");
+  }
+
+  if (password.length < 6) {
+    redirect("/auth/reset-password?error=password_too_short");
+  }
+
+  if (password !== confirmPassword) {
+    redirect("/auth/reset-password?error=password_mismatch");
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    const code =
+      "code" in error && typeof error.code === "string" ? error.code : "";
+    redirect(
+      `/auth/reset-password?error=update_failed${
+        code ? `&code=${encodeURIComponent(code)}` : ""
+      }`
+    );
+  }
+
+  await supabase.auth.signOut();
+  redirect("/auth?password_reset=1");
 }
 
 export async function signOut() {

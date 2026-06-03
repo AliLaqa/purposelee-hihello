@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth/guards";
-import { upsertCard } from "./actions";
+import { deleteMyCard, upsertCard } from "./actions";
 import AvatarField from "@/components/cards/avatar_field";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +23,10 @@ function errorMessage(code?: string) {
       return "That slug is already taken. Choose another.";
     case "avatar_upload_failed":
       return "Avatar upload failed. Try again.";
+    case "delete_confirm_required":
+      return "Confirm card deletion before deleting.";
+    case "delete_failed":
+      return "Unable to delete card. Try again.";
     case "save_failed":
     default:
       return "Unable to save. Try again.";
@@ -192,6 +196,31 @@ export default async function CardEditorPage(props: {
           ) : null}
         </div>
       </form>
+
+      {card ? (
+        <form
+          action={deleteMyCard}
+          className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-6"
+        >
+          <h2 className="text-sm font-semibold text-red-900">Delete card</h2>
+          <p className="mt-1 text-sm text-red-800">
+            This removes your public card and its current avatar file. Your
+            account stays active.
+          </p>
+          <label className="mt-4 flex items-center gap-2 text-sm font-medium text-red-900">
+            <input
+              type="checkbox"
+              name="confirm_delete"
+              value="1"
+              required
+            />
+            I understand this card will be deleted.
+          </label>
+          <button className="mt-4 h-10 rounded-xl border border-red-300 bg-white px-4 text-sm font-semibold text-red-700">
+            Delete my card
+          </button>
+        </form>
+      ) : null}
     </div>
   );
 }

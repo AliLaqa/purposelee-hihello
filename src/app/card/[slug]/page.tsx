@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import QRCode from "react-qr-code";
 import { notFound } from "next/navigation";
@@ -13,9 +14,76 @@ function getBaseUrl() {
   return "http://localhost:3000";
 }
 
-export default async function PublicCardPage(props: {
+type PublicCardPageProps = {
   params: Promise<{ slug: string }>;
-}) {
+};
+
+async function getPublicCard(slug: string) {
+  if (!getSupabasePublicConfig()) {
+    return null;
+  }
+
+  const supabase = await createClient();
+  const { data: card } = await supabase
+    .from("cards")
+    .select("slug,full_name,company,email,phone,avatar_path")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (!card) {
+    return null;
+  }
+
+  const { data: avatarUrlData } = card.avatar_path
+    ? supabase.storage.from("avatars").getPublicUrl(card.avatar_path)
+    : { data: { publicUrl: null } };
+
+  return { card, avatarUrl: avatarUrlData?.publicUrl ?? null };
+}
+
+export async function generateMetadata({
+  params,
+}: PublicCardPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const result = await getPublicCard(slug);
+
+  if (!result) {
+    return {
+      title: "Card not found | MyHello",
+      description: "This MyHello card is unavailable.",
+    };
+  }
+
+  const { card, avatarUrl } = result;
+  const url = `${getBaseUrl()}/card/${encodeURIComponent(card.slug)}`;
+  const title = `${card.full_name} - ${card.company}`;
+  const description = `Digital business card for ${card.full_name} at ${card.company}.`;
+  const images = avatarUrl
+    ? [{ url: avatarUrl, alt: `${card.full_name} photo` }]
+    : undefined;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: "MyHello",
+      type: "profile",
+      images,
+    },
+    twitter: {
+      card: avatarUrl ? "summary_large_image" : "summary",
+      title,
+      description,
+      images: avatarUrl ? [avatarUrl] : undefined,
+    },
+  };
+}
+
+export default async function PublicCardPage(props: PublicCardPageProps) {
   const { slug } = await props.params;
 
   if (!getSupabasePublicConfig()) {
@@ -38,20 +106,13 @@ export default async function PublicCardPage(props: {
     );
   }
 
-  const supabase = await createClient();
-  const { data: card } = await supabase
-    .from("cards")
-    .select("slug,full_name,company,email,phone,avatar_path")
-    .eq("slug", slug)
-    .maybeSingle();
+  const result = await getPublicCard(slug);
 
-  if (!card) {
+  if (!result) {
     notFound();
   }
 
-  const { data: avatarUrlData } = card.avatar_path
-    ? supabase.storage.from("avatars").getPublicUrl(card.avatar_path)
-    : { data: { publicUrl: null } };
+  const { card, avatarUrl } = result;
 
   const url = `${getBaseUrl()}/card/${encodeURIComponent(card.slug)}`;
   const vcardUrl = `/card/${encodeURIComponent(card.slug)}/vcard`;
@@ -61,10 +122,10 @@ export default async function PublicCardPage(props: {
       <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <div className="flex items-start gap-4">
           <div className="h-16 w-16 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)]">
-            {avatarUrlData?.publicUrl ? (
+            {avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={avatarUrlData.publicUrl}
+                src={avatarUrl}
                 alt={card.full_name}
                 className="h-full w-full object-cover"
               />

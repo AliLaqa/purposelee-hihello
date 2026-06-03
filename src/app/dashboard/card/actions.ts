@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/guards";
 import { isValidSlug, slugify } from "@/lib/cards/slug";
 import { randomUUID } from "crypto";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getSupabaseSecretKey } from "@/lib/env";
 
 function getSiteUrl(): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL;
@@ -119,4 +121,49 @@ export async function upsertCard(formData: FormData) {
 
   const shareUrl = `${getSiteUrl()}/card/${encodeURIComponent(slug)}`;
   redirect(`/dashboard/card?saved=1&share=${encodeURIComponent(shareUrl)}`);
+}
+
+export async function deleteMyCard(formData: FormData) {
+  const { supabase, userId } = await requireUser();
+  const confirmed = String(formData.get("confirm_delete") || "") === "1";
+
+  if (!confirmed) {
+    redirect("/dashboard/card?error=delete_confirm_required");
+  }
+
+  const { data: card } = await supabase
+    .from("cards")
+    .select("id,avatar_path")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!card) {
+    redirect("/dashboard?card_deleted=1");
+  }
+
+  const { error } = await supabase.from("cards").delete().eq("id", card.id);
+  if (error) {
+    console.error("Card delete failed", error);
+    redirect("/dashboard/card?error=delete_failed");
+  }
+
+  if (getSupabaseSecretKey()) {
+    const admin = createAdminClient();
+
+    if (card.avatar_path) {
+      await admin.storage.from("avatars").remove([card.avatar_path]);
+    }
+
+    await admin.from("audit_events").insert({
+      actor_user_id: userId,
+      action: "user.delete_card",
+      target_type: "card",
+      target_id: card.id,
+      metadata: {},
+    });
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/card");
+  redirect("/dashboard?card_deleted=1");
 }

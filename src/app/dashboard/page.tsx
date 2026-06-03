@@ -4,8 +4,15 @@ import { signOut } from "@/app/auth/actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+type SearchParams = {
+  card_deleted?: string;
+};
+
+export default async function DashboardPage(props: {
+  searchParams: Promise<SearchParams>;
+}) {
   const { supabase, userId } = await requireUser();
+  const searchParams = await props.searchParams;
 
   const { data: card } = await supabase
     .from("cards")
@@ -30,6 +37,12 @@ export default async function DashboardPage() {
           </button>
         </form>
       </div>
+
+      {searchParams.card_deleted === "1" ? (
+        <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+          Card deleted.
+        </div>
+      ) : null}
 
       <div className="mt-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
         {card ? (
