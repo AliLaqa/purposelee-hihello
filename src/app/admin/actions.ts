@@ -34,9 +34,14 @@ export async function setUserBlocked(formData: FormData) {
 
   const userId = String(formData.get("user_id") || "");
   const block = String(formData.get("block") || "0") === "1";
+  const confirmed = String(formData.get("confirm_block_action") || "") === "1";
 
   if (!userId) {
     redirect("/admin?error=missing_user");
+  }
+
+  if (!confirmed) {
+    redirect("/admin?error=block_confirm_required");
   }
 
   await admin.from("profiles").update({ is_blocked: block }).eq("id", userId);
@@ -203,8 +208,13 @@ export async function deleteUser(formData: FormData) {
   const admin = createAdminClient();
 
   const userId = String(formData.get("user_id") || "");
+  const confirmed = String(formData.get("confirm_delete_user") || "") === "1";
   if (!userId) {
     redirect("/admin?error=missing_user");
+  }
+
+  if (!confirmed) {
+    redirect("/admin?error=user_delete_confirm_required");
   }
 
   // Guardrail: prevent self-delete (admin identity == auth user).

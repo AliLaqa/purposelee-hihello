@@ -23,6 +23,35 @@ type SearchParams = {
   invite_revoked?: string;
 };
 
+function getInviteStatusMeta(status: string, expiresAt: string | null) {
+  const isExpired =
+    status === "pending" &&
+    Boolean(expiresAt) &&
+    new Date(expiresAt as string).getTime() < Date.now();
+
+  if (isExpired) {
+    return { label: "expired", className: "text-red-700", isPending: false };
+  }
+
+  if (status === "accepted") {
+    return {
+      label: "accepted",
+      className: "text-emerald-700",
+      isPending: false,
+    };
+  }
+
+  if (status === "revoked") {
+    return { label: "revoked", className: "text-amber-700", isPending: false };
+  }
+
+  return {
+    label: "pending",
+    className: "text-yellow-500",
+    isPending: true,
+  };
+}
+
 function getSiteUrl(): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL;
   if (configured) return configured.replace(/\/+$/, "");
@@ -116,6 +145,8 @@ export default async function AdminPage(props: {
         <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
           {searchParams.error === "missing_user"
             ? "Missing user id."
+            : searchParams.error === "block_confirm_required"
+            ? "Confirm block or unblock before continuing."
             : searchParams.error === "self_delete_not_allowed"
             ? "You cannot delete your own admin account."
             : searchParams.error === "cannot_delete_last_admin"
@@ -124,6 +155,8 @@ export default async function AdminPage(props: {
             ? "Missing card id."
             : searchParams.error === "card_delete_confirm_required"
             ? "Confirm card deletion before deleting."
+            : searchParams.error === "user_delete_confirm_required"
+            ? "Confirm user deletion before deleting."
             : searchParams.error === "card_delete_failed"
             ? "Unable to delete card."
             : searchParams.error === "missing_invite_email"
@@ -206,6 +239,10 @@ export default async function AdminPage(props: {
             const inviteUrl = `${getSiteUrl()}/auth?invite=${encodeURIComponent(
               invite.token
             )}`;
+            const inviteStatus = getInviteStatusMeta(
+              invite.status,
+              invite.expires_at ?? null
+            );
 
             return (
               <div
@@ -221,11 +258,14 @@ export default async function AdminPage(props: {
                       {inviteUrl}
                     </div>
                     <div className="mt-1 text-xs text-[var(--color-muted)]">
-                      Status: {invite.status}
+                      Status:{" "}
+                      <span className={inviteStatus.className}>
+                        {inviteStatus.label}
+                      </span>
                       {invite.expires_at ? ` · Expires: ${new Date(invite.expires_at).toLocaleDateString()}` : ""}
                     </div>
                   </div>
-                  {invite.status === "pending" ? (
+                  {inviteStatus.isPending ? (
                     <div className="flex items-center gap-2">
                       <InviteCopyButton url={inviteUrl} />
                       <form action={revokeInvite}>
@@ -249,10 +289,8 @@ export default async function AdminPage(props: {
       </div>
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-        <div className="grid grid-cols-[2fr_1fr_1fr] gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-xs font-semibold text-[var(--color-muted)]">
-          <div>User</div>
-          <div>Status</div>
-          <div className="text-right">Actions</div>
+        <div className="border-b border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-xs font-semibold text-[var(--color-muted)]">
+          User
         </div>
         <div className="divide-y divide-[var(--color-border)]">
           {(users ?? []).map((u) => {
@@ -262,11 +300,20 @@ export default async function AdminPage(props: {
             const cardId = firstCard?.id ?? null;
 
             return (
-              <div
-                key={u.id}
-                className="grid grid-cols-[2fr_1fr_1fr] gap-3 px-4 py-3"
-              >
+              <div key={u.id} className="px-4 py-3">
                 <div className="min-w-0">
+                  <div className="mb-2 flex items-center gap-2 text-xs text-[var(--color-muted)]">
+                    <span>Status</span>
+                    {u.is_blocked ? (
+                      <span className="text-xs font-semibold text-red-700">
+                        Blocked
+                      </span>
+                    ) : (
+                      <span className="text-xs font-semibold text-emerald-700">
+                        Active
+                      </span>
+                    )}
+                  </div>
                   <div className="truncate text-sm font-semibold text-[var(--color-text)]">
                     {name || u.email}
                   </div>
@@ -289,59 +336,66 @@ export default async function AdminPage(props: {
                       No card
                     </div>
                   )}
-                  {cardId ? (
-                    <form action={deleteUserCard} className="mt-3 grid gap-2">
+
+                  <div className="mt-3 flex flex-wrap items-start gap-3">
+                    {cardId ? (
+                      <form action={deleteUserCard} className="grid gap-2">
+                        <input type="hidden" name="user_id" value={u.id} />
+                        <input type="hidden" name="card_id" value={cardId} />
+                        <label className="flex items-center gap-2 text-xs text-[var(--color-muted)]">
+                          <input
+                            type="checkbox"
+                            name="confirm_delete_card"
+                            value="1"
+                            required
+                          />
+                          Confirm card deletion
+                        </label>
+                        <button className="h-8 w-fit rounded-xl border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700">
+                          Delete card only
+                        </button>
+                      </form>
+                    ) : null}
+
+                    <form action={setUserBlocked} className="grid gap-2">
                       <input type="hidden" name="user_id" value={u.id} />
-                      <input type="hidden" name="card_id" value={cardId} />
+                      <input
+                        type="hidden"
+                        name="block"
+                        value={u.is_blocked ? "0" : "1"}
+                      />
                       <label className="flex items-center gap-2 text-xs text-[var(--color-muted)]">
                         <input
                           type="checkbox"
-                          name="confirm_delete_card"
+                          name="confirm_block_action"
                           value="1"
                           required
                         />
-                        Confirm card deletion
+                        {u.is_blocked ? "Confirm unblock" : "Confirm block"}
                       </label>
-                      <button className="h-8 w-fit rounded-xl border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700">
-                        Delete card only
+                      <button className="h-8 w-fit rounded-xl border border-[var(--color-border)] px-3 text-xs font-semibold text-[var(--color-text)]">
+                        {u.is_blocked ? "Unblock" : "Block"}
                       </button>
                     </form>
-                  ) : null}
-                </div>
 
-                <div className="flex items-center">
-                  {u.is_blocked ? (
-                    <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">
-                      Blocked
-                    </span>
-                  ) : (
-                    <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800">
-                      Active
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-end gap-2">
-                  <form action={setUserBlocked}>
-                    <input type="hidden" name="user_id" value={u.id} />
-                    <input
-                      type="hidden"
-                      name="block"
-                      value={u.is_blocked ? "0" : "1"}
-                    />
-                    <button className="h-9 rounded-xl border border-[var(--color-border)] px-3 text-xs font-semibold text-[var(--color-text)]">
-                      {u.is_blocked ? "Unblock" : "Block"}
-                    </button>
-                  </form>
-
-                  {u.id === actorUserId ? null : (
-                    <form action={deleteUser}>
-                      <input type="hidden" name="user_id" value={u.id} />
-                      <button className="h-9 rounded-xl border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700">
-                        Delete
-                      </button>
-                    </form>
-                  )}
+                    {u.id === actorUserId ? null : (
+                      <form action={deleteUser} className="grid gap-2">
+                        <input type="hidden" name="user_id" value={u.id} />
+                        <label className="flex items-center gap-2 text-xs text-[var(--color-muted)]">
+                          <input
+                            type="checkbox"
+                            name="confirm_delete_user"
+                            value="1"
+                            required
+                          />
+                          Confirm user deletion
+                        </label>
+                        <button className="h-8 w-fit rounded-xl border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700">
+                          Delete
+                        </button>
+                      </form>
+                    )}
+                  </div>
                 </div>
               </div>
             );
