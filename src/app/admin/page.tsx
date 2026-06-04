@@ -99,6 +99,12 @@ export default async function AdminPage(props: {
     .order("created_at", { ascending: false })
     .limit(200);
 
+  const { data: adminUsers } = await admin
+    .from("admin_users")
+    .select("user_id");
+
+  const adminUserIds = new Set((adminUsers ?? []).map((row) => row.user_id));
+
   const { data: invites } = await admin
     .from("invites")
     .select("id,email,token,status,expires_at,created_at")
@@ -312,21 +318,30 @@ export default async function AdminPage(props: {
             const slug = firstCard?.slug ?? null;
             const name = firstCard?.full_name ?? null;
             const cardId = firstCard?.id ?? null;
+            const accountType = adminUserIds.has(u.id) ? "Admin" : "User";
 
             return (
               <div key={u.id} className="px-4 py-3">
                 <div className="min-w-0">
-                  <div className="mb-2 flex items-center gap-2 text-xs text-[var(--color-muted)]">
-                    <span>Status</span>
-                    {u.is_blocked ? (
-                      <span className="text-xs font-semibold text-red-700">
-                        Blocked
+                  <div className="mb-2 grid gap-1 text-xs text-[var(--color-muted)]">
+                    <div className="flex items-center gap-2">
+                      <span>Status</span>
+                      {u.is_blocked ? (
+                        <span className="text-xs font-semibold text-red-700">
+                          Blocked
+                        </span>
+                      ) : (
+                        <span className="text-xs font-semibold text-emerald-700">
+                          Active
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span>Account type</span>
+                      <span className="text-xs font-semibold text-[var(--color-text)]">
+                        {accountType}
                       </span>
-                    ) : (
-                      <span className="text-xs font-semibold text-emerald-700">
-                        Active
-                      </span>
-                    )}
+                    </div>
                   </div>
                   <div className="truncate text-sm font-semibold text-[var(--color-text)]">
                     {name || u.email}
