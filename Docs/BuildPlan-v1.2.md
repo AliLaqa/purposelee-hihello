@@ -27,7 +27,7 @@ This release also introduces a small role separation inside the admin layer: an 
 - Department/team-scoped permissions or per-feature custom permission toggles
 - Multi-tenant workspace/org management
 - Advanced reporting dashboards or business analytics
-- SMTP/provider-based invite delivery workflows
+- Advanced multi-provider or templated invite email delivery workflows beyond the basic personal-Gmail SMTP setup
 - Complex settings categories that are not yet backed by real product behavior
 
 ## Build Plan (v1.2)
@@ -96,3 +96,20 @@ Implementation: Keep the existing minimum-admin continuity rule where appropriat
 Implementation: Include minimal role metadata such as actor role and target admin role for block, unblock, card deletion, and user deletion events without logging sensitive request data.
 #### E.11 - Test owner/admin/user authorization boundaries [Not implemented] [Not tested]
 Implementation: Verify owner controls for normal users/admins, owner-to-owner protection, minimum two-owner protection, normal admin access to normal users only, normal admin denial against admins/owners, normal-user denial from admin routes, no normal-user self-promotion request path, and forged form submission denial.
+
+### Step F - Invite email delivery via personal Gmail SMTP [Not implemented]
+Implementation: Extend the existing invite-token flow so invite emails are sent automatically from a dedicated personal Gmail account using Gmail SMTP with 2-Step Verification and an App Password, while keeping the current copyable invite link as a fallback.
+#### F.1 - Configure Gmail SMTP credentials for server-side use [Not implemented] [Not tested]
+Implementation: Add server-only environment variables for `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `EMAIL_FROM`, using `smtp.gmail.com` and a Gmail App Password from a 2-Step-Verification-enabled personal Google account (no Google Workspace required).
+#### F.2 - Add a small server-only invite email sender [Not implemented] [Not tested]
+Implementation: Create a server-side mail helper that sends plain invite emails through Gmail SMTP without exposing credentials to the browser.
+#### F.3 - Send invite email after invite creation [Not implemented] [Not tested]
+Implementation: After `createInvite()` inserts the invite row and generates the invite token/link, send the email automatically to the invited address with the signup link and basic instructions.
+#### F.4 - Keep manual invite link fallback when email delivery fails [Not implemented] [Not tested]
+Implementation: Preserve the existing visible invite link in `/admin` so admins can still copy/share the link manually if SMTP delivery fails or is temporarily unavailable.
+#### F.5 - Show delivery outcome and support resend [Not implemented] [Not tested]
+Implementation: Surface whether the invite email was sent successfully, failed, or needs retry, and add a resend action for pending invites.
+#### F.6 - Record invite email delivery actions safely [Not implemented] [Not tested]
+Implementation: Audit email send and resend actions with minimal metadata such as invite id, recipient email, and delivery result, without storing SMTP secrets or verbose provider responses.
+#### F.7 - Manual test Gmail SMTP invite delivery [Not implemented] [Not tested]
+Implementation: Verify that creating an invite sends the email to the target inbox, the invite link opens correctly, signup still requires the matching email, resend works for pending invites, and the manual copy-link fallback remains usable.

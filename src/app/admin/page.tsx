@@ -11,6 +11,7 @@ import {
 } from "./actions";
 import { getSupabaseSecretKey } from "@/lib/env";
 import { signOut } from "@/app/auth/actions";
+import InviteCopyButton from "./invite_copy_button";
 
 export const dynamic = "force-dynamic";
 
@@ -225,12 +226,15 @@ export default async function AdminPage(props: {
                     </div>
                   </div>
                   {invite.status === "pending" ? (
-                    <form action={revokeInvite}>
-                      <input type="hidden" name="invite_id" value={invite.id} />
-                      <button className="h-8 rounded-xl border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700">
-                        Revoke
-                      </button>
-                    </form>
+                    <div className="flex items-center gap-2">
+                      <InviteCopyButton url={inviteUrl} />
+                      <form action={revokeInvite}>
+                        <input type="hidden" name="invite_id" value={invite.id} />
+                        <button className="h-8 rounded-xl border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700">
+                          Revoke
+                        </button>
+                      </form>
+                    </div>
                   ) : null}
                 </div>
               </div>
@@ -274,6 +278,8 @@ export default async function AdminPage(props: {
                       <Link
                         className="underline text-[var(--color-text)]"
                         href={`/card/${encodeURIComponent(slug)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         /card/{slug}
                       </Link>
