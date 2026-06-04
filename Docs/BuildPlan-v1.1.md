@@ -25,6 +25,7 @@ MyHello v1.1 is a small follow-up release after v1, focused on **operational/adm
 - **Admin “Signed in as” header**: Show the logged-in admin’s email (and optional display name) in the admin dashboard header; allow updating `profiles.display_name`.
 - **Admin sign-out from `/admin`**: Provide a sign-out button/action directly in the admin dashboard header.
 - **Admin return navigation from dashboard**: Show an admin-only link from `/dashboard` back to `/admin` so admins can move between their normal user dashboard and admin panel.
+- **Admin manual refresh controls**: Add per-section refresh buttons in `/admin` so admins can reload stale Users and Invites data after changes made outside the admin panel.
 - **Separate auth pages (Sign in / Sign up)**: Split the combined `/auth` page into dedicated Sign in and Sign up pages for a clearer UX.
 - **Admin-only invitations (no public signup)**: Only invited users can create accounts; disable open/public signup.
 - **Open Graph link previews**: Public card links (`/card/[slug]`) produce rich previews (title/description/image) on chat/social apps.
@@ -201,3 +202,12 @@ Implementation: Add an admin-only navigation control on `/dashboard` that links 
 Implementation: Query `admin_users` for the signed-in user on the server and treat the link as visible only when the user is allowlisted.
 #### P.2 - Render admin-only `/admin` link in dashboard header [Implemented] [Tested]
 Implementation: Add an "Admin panel" link near the dashboard header actions for admins only; normal users should not see it.
+
+### Step Q - Manual refresh controls for admin data [Implemented] [Tested]
+Implementation: Add lightweight refresh controls in `/admin` so admins can manually reload stale Users and Invites data caused by changes made outside the admin panel, without reloading the whole browser tab.
+#### Q.1 - Add refresh control to the Invites section [Implemented] [Tested]
+Implementation: Render a small refresh button in the Invites section header that triggers a route refresh and re-renders invite status/acceptance changes from the server.
+#### Q.2 - Add refresh control to the Users section [Implemented] [Tested]
+Implementation: Render a separate refresh button in the Users section header that triggers the same route refresh so admins can reload user/card/status changes made elsewhere.
+#### Q.3 - Keep refresh action lightweight and safe [Implemented] [Tested]
+Implementation: Use a client-side route refresh (`router.refresh()`) instead of polling, realtime subscriptions, or a full browser reload.

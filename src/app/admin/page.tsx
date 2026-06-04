@@ -12,6 +12,7 @@ import {
 import { getSupabaseSecretKey } from "@/lib/env";
 import { signOut } from "@/app/auth/actions";
 import InviteCopyButton from "./invite_copy_button";
+import AdminRefreshButton from "./admin_refresh_button";
 
 export const dynamic = "force-dynamic";
 
@@ -220,9 +221,12 @@ export default async function AdminPage(props: {
       </form>
 
       <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-        <h2 className="text-sm font-semibold text-[var(--color-text)]">
-          Invites
-        </h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold text-[var(--color-text)]">
+            Invites
+          </h2>
+          <AdminRefreshButton label="Invites" />
+        </div>
         <form action={createInvite} className="mt-3 flex flex-col gap-2 sm:flex-row">
           <input
             name="email"
@@ -298,8 +302,9 @@ export default async function AdminPage(props: {
       </div>
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-        <div className="border-b border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-xs font-semibold text-[var(--color-muted)]">
-          User
+        <div className="flex items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-xs font-semibold text-[var(--color-muted)]">
+          <span>User</span>
+          <AdminRefreshButton label="Users" />
         </div>
         <div className="divide-y divide-[var(--color-border)]">
           {(users ?? []).map((u) => {
