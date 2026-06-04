@@ -217,7 +217,7 @@ export default async function AdminPage(props: {
               name="display_name"
               defaultValue={adminName}
               placeholder={adminEmail}
-              className="h-10 flex-1 rounded-xl border border-[var(--color-border)] bg-transparent px-3 text-sm text-[var(--color-text)] outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              className="min-h-14 w-full appearance-none rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3.5 text-base leading-6 font-medium text-slate-100 caret-slate-100 outline-none placeholder:text-slate-400 [-webkit-text-fill-color:#f1f5f9] focus:bg-white focus:text-slate-900 focus:caret-slate-900 focus:placeholder:text-slate-400 focus:[-webkit-text-fill-color:#0f172a] focus:ring-2 focus:ring-[var(--color-primary)] sm:min-h-12 sm:py-3 sm:text-sm"
             />
             <button className="h-10 rounded-xl border border-[var(--color-border)] px-3 text-sm font-semibold text-[var(--color-text)]">
               Save name
@@ -239,7 +239,7 @@ export default async function AdminPage(props: {
             type="email"
             required
             placeholder="employee@example.com"
-            className="h-10 flex-1 rounded-xl border border-[var(--color-border)] bg-transparent px-3 text-sm text-[var(--color-text)] outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            className="min-h-14 w-full appearance-none rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3.5 text-base leading-6 font-medium text-slate-100 caret-slate-100 outline-none placeholder:text-slate-400 [-webkit-text-fill-color:#f1f5f9] focus:bg-white focus:text-slate-900 focus:caret-slate-900 focus:placeholder:text-slate-400 focus:[-webkit-text-fill-color:#0f172a] focus:ring-2 focus:ring-[var(--color-primary)] sm:min-h-12 sm:py-3 sm:text-sm"
           />
           <button className="h-10 rounded-xl border border-[var(--color-border)] px-3 text-sm font-semibold text-[var(--color-text)]">
             Create invite
