@@ -147,7 +147,7 @@ Implementation: Add minimal throttling/rate limiting for public/semi-public rout
 #### J.1 - Add minimal IP-based throttling (middleware or edge) [Not implemented] [Not tested]
 Implementation: Apply a simple per-IP request limit with short windows, returning 429 for bursts; scope only to public routes to avoid breaking normal internal usage.
 
-### Step K - Password reset (account recovery) [Implemented] [Partially tested]
+### Step K - Password reset (account recovery) [Implemented] [Tested]
 Implementation: Add a standard "Forgot password" flow using Supabase password reset emails and an in-app reset page for setting a new password.
 #### K.1 - Add "Forgot password?" link + reset request form [Implemented] [Tested]
 Implementation: On Sign in, add a link to a reset request page where the user enters email; call `supabase.auth.resetPasswordForEmail(...)` with `redirectTo` pointing back to the app.
@@ -155,9 +155,9 @@ Implementation: On Sign in, add a link to a reset request page where the user en
 Implementation: Create a reset page that accepts the recovery session and submits `supabase.auth.updateUser({ password })`, then redirects to Sign in with a success message.
 #### K.3 - Configure Supabase redirect URLs for password recovery [Implemented] [Tested]
 Implementation: Ensure Supabase Auth URL Configuration allows the deployed app URL and the recovery redirect path(s) so the reset link returns to the correct page.
-#### K.4 - Manual test (Android + iOS) [Implemented] [Partially tested]
+#### K.4 - Manual test (Android + iOS) [Implemented] [Tested]
 Implementation: Verify reset email arrives, link opens the reset page, password updates successfully, and the user can sign in with the new password.
-Testing note: Desktop/browser reset flow passed locally; Android and iOS password-reset validation are still pending.
+Testing note: Desktop/browser reset flow passed locally; mobile password-reset validation passed on personal devices.
 
 ### Step L - Image upload size limits [Not implemented]
 Implementation: Add explicit image size guardrails for avatar/logo uploads so large files are blocked before they create Storage or UX issues.
