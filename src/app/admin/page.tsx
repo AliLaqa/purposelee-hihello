@@ -96,6 +96,8 @@ export default async function AdminPage(props: {
           <div className="flex flex-wrap justify-end gap-2">
             <Link
               href="/dashboard"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex h-10 items-center rounded-xl border border-[var(--color-border)] px-3 text-sm font-semibold text-[var(--color-text)]"
             >
               Go to dashboard
