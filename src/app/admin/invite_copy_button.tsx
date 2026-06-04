@@ -45,11 +45,18 @@ export default function InviteCopyButton({ url }: Props) {
     }
   }
 
+  const buttonClassName =
+    copyStatus === "copied"
+      ? "h-8 rounded-xl border border-emerald-300 bg-emerald-50 px-3 text-xs font-semibold text-emerald-700"
+      : copyStatus === "failed"
+      ? "h-8 rounded-xl border border-red-300 bg-red-50 px-3 text-xs font-semibold text-red-700"
+      : "h-8 rounded-xl border border-sky-300 bg-sky-50 px-3 text-xs font-semibold text-sky-700";
+
   return (
     <button
       type="button"
       onClick={copy}
-      className="h-8 rounded-xl border border-[var(--color-border)] px-3 text-xs font-semibold text-[var(--color-text)]"
+      className={buttonClassName}
     >
       {copyStatus === "copied"
         ? "Copied"

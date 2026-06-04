@@ -347,25 +347,6 @@ export default async function AdminPage(props: {
                   )}
 
                   <div className="mt-3 flex flex-wrap items-start gap-3">
-                    {cardId ? (
-                      <form action={deleteUserCard} className="grid gap-2">
-                        <input type="hidden" name="user_id" value={u.id} />
-                        <input type="hidden" name="card_id" value={cardId} />
-                        <label className="flex items-center gap-2 text-xs text-[var(--color-muted)]">
-                          <input
-                            type="checkbox"
-                            name="confirm_delete_card"
-                            value="1"
-                            required
-                          />
-                          Confirm card deletion
-                        </label>
-                        <button className="h-8 w-fit rounded-xl border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700">
-                          Delete card only
-                        </button>
-                      </form>
-                    ) : null}
-
                     <form action={setUserBlocked} className="grid gap-2">
                       <input type="hidden" name="user_id" value={u.id} />
                       <input
@@ -382,10 +363,29 @@ export default async function AdminPage(props: {
                         />
                         {u.is_blocked ? "Confirm unblock" : "Confirm block"}
                       </label>
-                      <button className="h-8 w-fit rounded-xl border border-[var(--color-border)] px-3 text-xs font-semibold text-[var(--color-text)]">
-                        {u.is_blocked ? "Unblock" : "Block"}
+                      <button className="h-8 w-fit rounded-xl border border-yellow-300 bg-yellow-50 px-3 text-xs font-semibold text-yellow-700">
+                        {u.is_blocked ? "Unblock User" : "Block User"}
                       </button>
                     </form>
+
+                    {cardId ? (
+                      <form action={deleteUserCard} className="grid gap-2">
+                        <input type="hidden" name="user_id" value={u.id} />
+                        <input type="hidden" name="card_id" value={cardId} />
+                        <label className="flex items-center gap-2 text-xs text-[var(--color-muted)]">
+                          <input
+                            type="checkbox"
+                            name="confirm_delete_card"
+                            value="1"
+                            required
+                          />
+                          Confirm card deletion
+                        </label>
+                        <button className="h-8 w-fit rounded-xl border border-amber-300 bg-amber-100 px-3 text-xs font-semibold text-amber-800">
+                          Delete User cards
+                        </button>
+                      </form>
+                    ) : null}
 
                     {u.id === actorUserId ? null : (
                       <form action={deleteUser} className="grid gap-2">
@@ -399,8 +399,8 @@ export default async function AdminPage(props: {
                           />
                           Confirm user deletion
                         </label>
-                        <button className="h-8 w-fit rounded-xl border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700">
-                          Delete
+                        <button className="h-8 w-fit rounded-xl border border-red-300 bg-red-50 px-3 text-xs font-semibold text-red-700">
+                          Delete User
                         </button>
                       </form>
                     )}
