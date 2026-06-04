@@ -30,7 +30,7 @@ function getInviteStatusMeta(status: string, expiresAt: string | null) {
     new Date(expiresAt as string).getTime() < Date.now();
 
   if (isExpired) {
-    return { label: "expired", className: "text-red-700", isPending: false };
+    return { label: "expired", className: "text-amber-700", isPending: false };
   }
 
   if (status === "accepted") {
@@ -42,7 +42,7 @@ function getInviteStatusMeta(status: string, expiresAt: string | null) {
   }
 
   if (status === "revoked") {
-    return { label: "revoked", className: "text-amber-700", isPending: false };
+    return { label: "revoked", className: "text-red-700", isPending: false };
   }
 
   return {
@@ -165,6 +165,8 @@ export default async function AdminPage(props: {
             ? "Unable to create invite."
             : searchParams.error === "missing_invite"
             ? "Missing invite id."
+            : searchParams.error === "invite_revoke_confirm_required"
+            ? "Confirm invite revocation before revoking."
             : searchParams.error === "invite_revoke_failed"
             ? "Unable to revoke invite."
             : "Something went wrong."}
@@ -249,8 +251,7 @@ export default async function AdminPage(props: {
                 key={invite.id}
                 className="rounded-xl border border-[var(--color-border)] p-3"
               >
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0">
+                <div className="min-w-0">
                     <div className="truncate text-sm font-semibold text-[var(--color-text)]">
                       {invite.email}
                     </div>
@@ -264,13 +265,21 @@ export default async function AdminPage(props: {
                       </span>
                       {invite.expires_at ? ` · Expires: ${new Date(invite.expires_at).toLocaleDateString()}` : ""}
                     </div>
-                  </div>
                   {inviteStatus.isPending ? (
-                    <div className="flex items-center gap-2">
+                    <div className="mt-3 flex flex-wrap items-start gap-3">
                       <InviteCopyButton url={inviteUrl} />
-                      <form action={revokeInvite}>
+                      <form action={revokeInvite} className="grid gap-2">
                         <input type="hidden" name="invite_id" value={invite.id} />
-                        <button className="h-8 rounded-xl border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700">
+                        <label className="flex items-center gap-2 text-xs text-[var(--color-muted)]">
+                          <input
+                            type="checkbox"
+                            name="confirm_revoke_invite"
+                            value="1"
+                            required
+                          />
+                          Confirm revoke
+                        </label>
+                        <button className="h-8 w-fit rounded-xl border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700">
                           Revoke
                         </button>
                       </form>

@@ -129,8 +129,13 @@ export async function revokeInvite(formData: FormData) {
   const admin = createAdminClient();
 
   const inviteId = String(formData.get("invite_id") || "");
+  const confirmed = String(formData.get("confirm_revoke_invite") || "") === "1";
   if (!inviteId) {
     redirect("/admin?error=missing_invite");
+  }
+
+  if (!confirmed) {
+    redirect("/admin?error=invite_revoke_confirm_required");
   }
 
   const { error } = await admin
