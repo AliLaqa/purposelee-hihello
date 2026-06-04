@@ -267,7 +267,6 @@ export default async function AdminPage(props: {
                     </div>
                   {inviteStatus.isPending ? (
                     <div className="mt-3 flex flex-wrap items-start gap-3">
-                      <InviteCopyButton url={inviteUrl} />
                       <form action={revokeInvite} className="grid gap-2">
                         <input type="hidden" name="invite_id" value={invite.id} />
                         <label className="flex items-center gap-2 text-xs text-[var(--color-muted)]">
@@ -283,6 +282,7 @@ export default async function AdminPage(props: {
                           Revoke
                         </button>
                       </form>
+                      <InviteCopyButton url={inviteUrl} />
                     </div>
                   ) : null}
                 </div>
