@@ -130,15 +130,15 @@ Implementation: Start with copyable invite link (no provider); later swap to SMT
 #### H.5 - Audit invite actions [Implemented] [Tested]
 Implementation: Record `admin.create_invite`, `admin.revoke_invite`, `invite.accepted` in `audit_events`.
 
-### Step I - Open Graph / Twitter metadata for public cards [Implemented]
+### Step I - Open Graph / Twitter metadata for public cards [Implemented] [Tested]
 Implementation: Add dynamic metadata generation for `/card/[slug]` so shared links display rich previews (title/description/image) in chat/social platforms.
-#### I.1 - Implement `generateMetadata()` for `/card/[slug]` [Implemented] [Not tested]
+#### I.1 - Implement `generateMetadata()` for `/card/[slug]` [Implemented] [Tested]
 Implementation: Fetch card data by `slug` and generate `title`/`description` dynamically.
-#### I.2 - Add Open Graph (`og:*`) metadata [Implemented] [Not tested]
+#### I.2 - Add Open Graph (`og:*`) metadata [Implemented] [Tested]
 Implementation: Set `openGraph` metadata including `title`, `description`, `url`, and `images` when an avatar exists.
-#### I.3 - Add Twitter card metadata [Implemented] [Not tested]
+#### I.3 - Add Twitter card metadata [Implemented] [Tested]
 Implementation: Set `twitter` metadata (`summary`/`summary_large_image`) aligned with Open Graph fields.
-#### I.4 - Handle missing avatar / missing card safely [Implemented] [Not tested]
+#### I.4 - Handle missing avatar / missing card safely [Implemented] [Tested]
 Implementation: Use a default image or omit `images`; fall back to generic metadata for not-found/inactive cards.
 
 ### Step J - Basic abuse controls on public endpoints (minimal) [Not implemented]
