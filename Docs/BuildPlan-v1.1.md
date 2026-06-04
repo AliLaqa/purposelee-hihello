@@ -81,15 +81,15 @@ Implementation: Verify user can create up to N cards, cannot create N+1, and tha
 #### C.5 - Verify DB-layer card cap cannot be bypassed [Not implemented] [Not tested]
 Implementation: Manually attempt direct/forced card creation beyond the configured cap and confirm the database rejects it.
 
-### Step D - Card deletion (User + Admin) [Implemented]
+### Step D - Card deletion (User + Admin) [Implemented] [Tested]
 Implementation: Add explicit delete/deactivate flows for cards without deleting the underlying auth user (admin can delete a user’s card independently).
-#### D.1 - Add user card delete/deactivate action + confirmation [Implemented] [Not tested]
+#### D.1 - Add user card delete/deactivate action + confirmation [Implemented] [Tested]
 Implementation: Add a “Delete card” (or “Deactivate card”) action in `/dashboard/card` with a confirmation prompt; define whether it hard-deletes the row or sets `is_active=false`.
-#### D.2 - Handle avatar cleanup on user card delete (optional) [Implemented] [Not tested]
+#### D.2 - Handle avatar cleanup on user card delete (optional) [Implemented] [Tested]
 Implementation: If hard-deleting a card, optionally remove `avatars/<user_id>/*` (or just the referenced `avatar_path`) so Storage doesn’t accumulate unused files.
-#### D.3 - Add admin action to delete a user’s card only (not the user) + confirmation [Implemented] [Not tested]
+#### D.3 - Add admin action to delete a user’s card only (not the user) + confirmation [Implemented] [Tested]
 Implementation: In `/admin`, add a “Delete card” action per user that deletes the card row (or deactivates it) without deleting the profile/auth user; confirm before applying.
-#### D.4 - Record card deletion actions in `audit_events` [Implemented] [Not tested]
+#### D.4 - Record card deletion actions in `audit_events` [Implemented] [Tested]
 Implementation: Insert audit events like `admin.delete_card` / `user.delete_card` with target card id/user id in metadata.
 
 ### Step E - Admin identity in dashboard [Implemented] [Tested]
@@ -117,17 +117,17 @@ Implementation: Keep the “Admin login / Normal login” toggle on the Sign in 
 #### G.4 - Keep `/auth` as a redirect (optional) [Not implemented] [Not tested]
 Implementation: Optionally make `/auth` redirect to `/auth/sign-in` to preserve existing links/bookmarks.
 
-### Step H - Admin invitations + disable public signup [Implemented]
+### Step H - Admin invitations + disable public signup [Implemented] [Tested]
 Implementation: Add an admin invite flow so only invited users can sign up; block/disable open signup for everyone else.
-#### H.1 - Create `invites` table and policies [Implemented] [Not tested]
+#### H.1 - Create `invites` table and policies [Implemented] [Tested]
 Implementation: Add a table to store invite email, token, status, created_by admin id, and expiry; allow admin-only management.
-#### H.2 - Admin UI to create/revoke invites [Implemented] [Not tested]
+#### H.2 - Admin UI to create/revoke invites [Implemented] [Tested]
 Implementation: Add an “Invites” section in `/admin` to create an invite (email) and revoke it before use.
-#### H.3 - Signup flow requires valid invite token [Implemented] [Not tested]
+#### H.3 - Signup flow requires valid invite token [Implemented] [Tested]
 Implementation: Modify signup to require an invite token tied to the email; refuse signup when not invited.
-#### H.4 - Email delivery strategy (minimal) [Implemented] [Not tested]
+#### H.4 - Email delivery strategy (minimal) [Implemented] [Tested]
 Implementation: Start with copyable invite link (no provider); later swap to SMTP/provider if needed.
-#### H.5 - Audit invite actions [Implemented] [Not tested]
+#### H.5 - Audit invite actions [Implemented] [Tested]
 Implementation: Record `admin.create_invite`, `admin.revoke_invite`, `invite.accepted` in `audit_events`.
 
 ### Step I - Open Graph / Twitter metadata for public cards [Implemented]
