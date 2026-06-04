@@ -24,6 +24,7 @@ MyHello v1.1 is a small follow-up release after v1, focused on **operational/adm
 - **Admin card deletion**: Allow an admin to delete a normal user’s card (without deleting the user), with an explicit confirmation step and an audit event.
 - **Admin “Signed in as” header**: Show the logged-in admin’s email (and optional display name) in the admin dashboard header; allow updating `profiles.display_name`.
 - **Admin sign-out from `/admin`**: Provide a sign-out button/action directly in the admin dashboard header.
+- **Admin return navigation from dashboard**: Show an admin-only link from `/dashboard` back to `/admin` so admins can move between their normal user dashboard and admin panel.
 - **Separate auth pages (Sign in / Sign up)**: Split the combined `/auth` page into dedicated Sign in and Sign up pages for a clearer UX.
 - **Admin-only invitations (no public signup)**: Only invited users can create accounts; disable open/public signup.
 - **Open Graph link previews**: Public card links (`/card/[slug]`) produce rich previews (title/description/image) on chat/social apps.
@@ -193,3 +194,10 @@ Implementation: When a deleted/stale session is detected, clear the local Supaba
 Implementation: Ensure missing profiles are recreated only when the corresponding Auth user still exists.
 #### O.4 - Manual test deleted-user session behavior [Implemented] [Tested]
 Implementation: Delete a logged-in user from `/admin`, refresh their existing dashboard session, and confirm they are redirected to `/auth` instead of staying inside the app.
+
+### Step P - Admin return navigation from dashboard [Implemented] [Tested]
+Implementation: Add an admin-only navigation control on `/dashboard` that links back to `/admin`, matching the existing `/admin` to `/dashboard` path.
+#### P.1 - Detect current user's admin allowlist status on `/dashboard` [Implemented] [Tested]
+Implementation: Query `admin_users` for the signed-in user on the server and treat the link as visible only when the user is allowlisted.
+#### P.2 - Render admin-only `/admin` link in dashboard header [Implemented] [Tested]
+Implementation: Add an "Admin panel" link near the dashboard header actions for admins only; normal users should not see it.

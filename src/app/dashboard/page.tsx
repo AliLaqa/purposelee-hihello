@@ -20,6 +20,13 @@ export default async function DashboardPage(props: {
     .eq("user_id", userId)
     .maybeSingle();
 
+  const { data: adminRow } = await supabase
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const isAdmin = Boolean(adminRow);
+
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-10">
       <div className="flex items-center justify-between gap-4">
@@ -31,11 +38,21 @@ export default async function DashboardPage(props: {
             Create or edit your card.
           </p>
         </div>
-        <form action={signOut}>
-          <button className="h-10 rounded-xl border border-[var(--color-border)] px-3 text-sm font-semibold text-[var(--color-text)]">
-            Sign out
-          </button>
-        </form>
+        <div className="flex flex-wrap justify-end gap-2">
+          {isAdmin ? (
+            <Link
+              href="/admin"
+              className="inline-flex h-10 items-center rounded-xl border border-[var(--color-border)] px-3 text-sm font-semibold text-[var(--color-text)]"
+            >
+              Admin panel
+            </Link>
+          ) : null}
+          <form action={signOut}>
+            <button className="h-10 rounded-xl border border-[var(--color-border)] px-3 text-sm font-semibold text-[var(--color-text)]">
+              Sign out
+            </button>
+          </form>
+        </div>
       </div>
 
       {searchParams.card_deleted === "1" ? (

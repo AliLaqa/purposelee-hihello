@@ -98,7 +98,7 @@ export default async function AdminPage(props: {
               href="/dashboard"
               className="inline-flex h-10 items-center rounded-xl border border-[var(--color-border)] px-3 text-sm font-semibold text-[var(--color-text)]"
             >
-              Back to dashboard
+              Go to dashboard
             </Link>
             <form action={signOut}>
               <button className="h-10 rounded-xl border border-[var(--color-border)] px-3 text-sm font-semibold text-[var(--color-text)]">
