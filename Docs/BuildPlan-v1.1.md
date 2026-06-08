@@ -211,3 +211,14 @@ Implementation: Render a small refresh button in the Invites section header that
 Implementation: Render a separate refresh button in the Users section header that triggers the same route refresh so admins can reload user/card/status changes made elsewhere.
 #### Q.3 - Keep refresh action lightweight and safe [Implemented] [Tested]
 Implementation: Use a client-side route refresh (`router.refresh()`) instead of polling, realtime subscriptions, or a full browser reload.
+
+### Step R - Admin invite list controls + section split [Implemented] [Tested]
+Implementation: Split the growing `/admin` Invites and Users sections into dedicated components, and add invite filtering/pagination controls so long invite history does not push the Users table too far down the page.
+#### R.1 - Extract Invites and Users UI into dedicated admin components [Implemented] [Tested]
+Implementation: Move the `/admin` invite-management UI and user-management UI into separate files/components while keeping the same route and existing server actions.
+#### R.2 - Add invite status filters with counts [Implemented] [Tested]
+Implementation: Add `Pending`, `Accepted`, `Revoked`, `Expired`, and `All` filters (with counts) so admins can quickly focus on the invite state that needs attention.
+#### R.3 - Add invite page-size controls and pagination [Implemented] [Tested]
+Implementation: Limit the visible invite rows per page (for example 5/10/20) and add previous/next page navigation so invite history stays compact.
+#### R.4 - Default the invite view to Pending [Implemented] [Tested]
+Implementation: Show `Pending` invites by default so actionable invites remain visible first and the Users table stays easier to reach.
