@@ -104,6 +104,7 @@ export default function InvitesSection({
                   pageSize,
                   page: 1,
                 })}
+                scroll={false}
                 className={`inline-flex h-9 items-center rounded-lg border px-3 text-xs font-semibold ${
                   isActive
                     ? "border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-text)]"
@@ -132,6 +133,7 @@ export default function InvitesSection({
                     pageSize: size,
                     page: 1,
                   })}
+                  scroll={false}
                   className={`inline-flex h-8 items-center rounded-lg border px-3 text-xs font-semibold ${
                     isActive
                       ? "border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-text)]"
@@ -215,6 +217,7 @@ export default function InvitesSection({
                 pageSize,
                 page: currentPage - 1,
               })}
+              scroll={false}
               className="inline-flex h-9 items-center rounded-lg border border-[var(--color-border)] px-3 font-semibold text-[var(--color-text)]"
             >
               Previous
@@ -236,6 +239,7 @@ export default function InvitesSection({
                 pageSize,
                 page: currentPage + 1,
               })}
+              scroll={false}
               className="inline-flex h-9 items-center rounded-lg border border-[var(--color-border)] px-3 font-semibold text-[var(--color-text)]"
             >
               Next
