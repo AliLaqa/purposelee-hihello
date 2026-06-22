@@ -101,9 +101,9 @@ Implementation: Ensure invite email, status, link, copy action, and revoke actio
 Implementation: Replace technical or ambiguous flow messages with plain-language explanations and next steps.
 #### G.1 - Review auth error messages [Partially implemented] [Not tested]
 Implementation: Ensure invalid login, missing credentials, blocked account, invite required, invalid invite, and signup failure messages are clear.
-#### G.2 - Review card editor error messages [Partially implemented] [Not tested]
+#### G.2 - Review card editor error messages [Implemented] [Tested]
 Implementation: Ensure missing fields, slug taken, invalid slug, upload failure, save failure, and delete failure messages are actionable.
-#### G.3 - Reduce visible internal codes where possible [Not implemented] [Not tested]
+#### G.3 - Reduce visible internal codes where possible [Implemented] [Tested]
 Implementation: Avoid showing raw internal codes to non-technical users unless they are needed for support.
 
 ### Step H - Public card action polish [Partially implemented]

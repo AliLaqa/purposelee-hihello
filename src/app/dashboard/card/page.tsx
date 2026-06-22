@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth/guards";
+import { getCardEditorErrorMessage } from "@/lib/cards/error_messages";
 import { deleteMyCard, upsertCard } from "./actions";
 import AvatarField from "@/components/cards/avatar_field";
 import { ShareActions } from "@/components/share/share_actions";
@@ -8,35 +9,9 @@ export const dynamic = "force-dynamic";
 
 type SearchParams = {
   error?: string;
-  code?: string;
   saved?: string;
   share?: string;
 };
-
-function errorMessage(code?: string) {
-  if (!code) return null;
-  switch (code) {
-    case "missing_fields":
-      return "All fields are required.";
-    case "invalid_slug":
-      return "Slug can only contain letters, numbers, and hyphens.";
-    case "slug_taken":
-      return "That slug is already taken. Choose another.";
-    case "avatar_file_type_invalid":
-      return "Upload a JPG, PNG, or WebP image.";
-    case "avatar_file_too_large":
-      return "Image is too large. Upload one that is 5 MB or smaller.";
-    case "avatar_upload_failed":
-      return "We could not upload your image, so your card details were not saved. Try again.";
-    case "delete_confirm_required":
-      return "Confirm card deletion before deleting.";
-    case "delete_failed":
-      return "Unable to delete card. Try again.";
-    case "save_failed":
-    default:
-      return "Unable to save. Try again.";
-  }
-}
 
 export default async function CardEditorPage(props: {
   searchParams: Promise<SearchParams>;
@@ -56,8 +31,7 @@ export default async function CardEditorPage(props: {
 
   const shareUrl = searchParams.share;
   const saved = searchParams.saved === "1";
-  const error = errorMessage(searchParams.error);
-  const errorCode = searchParams.code;
+  const error = getCardEditorErrorMessage(searchParams.error);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-10">
@@ -87,11 +61,6 @@ export default async function CardEditorPage(props: {
       {error ? (
         <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
           {error}
-          {errorCode ? (
-            <div className="mt-1 text-xs opacity-80">
-              Code: <code className="font-mono">{errorCode}</code>
-            </div>
-          ) : null}
         </div>
       ) : null}
 

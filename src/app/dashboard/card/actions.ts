@@ -91,12 +91,8 @@ export async function upsertCard(formData: FormData) {
       const isSlugConflict = String(error.message || "")
         .toLowerCase()
         .includes("duplicate key");
-      const code =
-        "code" in error && typeof error.code === "string" ? error.code : "";
       redirect(
-        `/dashboard/card?error=${isSlugConflict ? "slug_taken" : "save_failed"}${
-          code ? `&code=${encodeURIComponent(code)}` : ""
-        }`
+        `/dashboard/card?error=${isSlugConflict ? "slug_taken" : "save_failed"}`
       );
     }
   } else {
@@ -121,12 +117,8 @@ export async function upsertCard(formData: FormData) {
       const isSlugConflict = String(error.message || "")
         .toLowerCase()
         .includes("duplicate key");
-      const code =
-        "code" in error && typeof error.code === "string" ? error.code : "";
       redirect(
-        `/dashboard/card?error=${isSlugConflict ? "slug_taken" : "save_failed"}${
-          code ? `&code=${encodeURIComponent(code)}` : ""
-        }`
+        `/dashboard/card?error=${isSlugConflict ? "slug_taken" : "save_failed"}`
       );
     }
   }
