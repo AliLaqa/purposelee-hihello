@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import type { MouseEvent } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 
 type Props = {
   url: string;
@@ -17,6 +18,12 @@ export function ShareActions({
 }: Props) {
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">(
     "idle"
+  );
+
+  const canShare = useSyncExternalStore(
+    () => () => {},
+    () => typeof navigator !== "undefined" && typeof navigator.share === "function",
+    () => false
   );
 
   const mailto = useMemo(() => {
@@ -65,6 +72,37 @@ export function ShareActions({
     await navigator.share({ title, url });
   }, [title, url]);
 
+  const handleEmailShareClick = useCallback(
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      console.log("Email share clicked", {
+        mailto,
+        url,
+        defaultPrevented: event.defaultPrevented,
+        button: event.button,
+        ctrlKey: event.ctrlKey,
+        metaKey: event.metaKey,
+        shiftKey: event.shiftKey,
+        altKey: event.altKey,
+        userAgent: navigator.userAgent,
+        visibilityState: document.visibilityState,
+        hasFocus: document.hasFocus(),
+      });
+
+      window.setTimeout(() => {
+        console.log("Email share post-click state", {
+          mailto,
+          visibilityState: document.visibilityState,
+          hasFocus: document.hasFocus(),
+          activeElement:
+            document.activeElement instanceof HTMLElement
+              ? document.activeElement.tagName
+              : null,
+        });
+      }, 500);
+    },
+    [mailto, url]
+  );
+
   return (
     <div className="flex flex-col gap-2 sm:flex-row">
       <button
@@ -79,7 +117,7 @@ export function ShareActions({
           : "Copy link"}
       </button>
 
-      {"share" in navigator ? (
+      {canShare ? (
         <button
           type="button"
           onClick={webShare}
@@ -91,6 +129,7 @@ export function ShareActions({
 
       <a
         href={mailto}
+        onClick={handleEmailShareClick}
         className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--color-border)] px-4 text-sm font-semibold text-[var(--color-text)]"
       >
         Share by email

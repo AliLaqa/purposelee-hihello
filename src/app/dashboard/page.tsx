@@ -86,18 +86,18 @@ export default async function DashboardPage(props: {
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="max-w-xl">
               <div className="text-sm font-semibold text-[var(--color-text)]">
                 No card yet
               </div>
-              <div className="text-sm text-[var(--color-muted)]">
-                Create your employee card to get a public share link and QR.
+              <div className="mt-1 text-sm text-[var(--color-muted)]">
+                Create your card to get a share link and QR code.
               </div>
             </div>
             <Link
               href="/dashboard/card"
-              className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-semibold text-white"
+              className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-xl bg-[var(--color-primary)] px-4 text-sm font-semibold text-white"
             >
               Create card
             </Link>

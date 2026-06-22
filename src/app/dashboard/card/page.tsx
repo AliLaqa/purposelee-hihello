@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth/guards";
 import { deleteMyCard, upsertCard } from "./actions";
 import AvatarField from "@/components/cards/avatar_field";
+import { ShareActions } from "@/components/share/share_actions";
 
 export const dynamic = "force-dynamic";
 
@@ -75,7 +76,7 @@ export default async function CardEditorPage(props: {
 
       {saved ? (
         <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
-          Saved.
+          Card saved successfully.
         </div>
       ) : null}
 
@@ -93,18 +94,30 @@ export default async function CardEditorPage(props: {
       {shareUrl ? (
         <div className="mt-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-sm">
           <div className="font-semibold text-[var(--color-text)]">
-            Share link
+            Your public card is ready
           </div>
-          <div className="mt-1 break-all text-[var(--color-muted)]">
+          <div className="mt-1 text-[var(--color-muted)]">
+            Open it, copy the link, or share it now. You can come back later to
+            update these details.
+          </div>
+          <div className="mt-3 break-all text-[var(--color-muted)]">
             {shareUrl}
           </div>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <Link
               href={shareUrl}
+              target="_blank"
+              rel="noreferrer"
               className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-semibold text-white"
             >
               Open public card
             </Link>
+            <ShareActions
+              url={shareUrl}
+              title={card?.full_name ? `${card.full_name} - MyHello Card` : "MyHello Card"}
+              emailSubject="My MyHello digital card"
+              emailBody={`Here is my MyHello digital card: ${shareUrl}`}
+            />
           </div>
         </div>
       ) : null}
