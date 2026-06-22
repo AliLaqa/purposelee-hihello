@@ -61,7 +61,7 @@ export default function UsersSection({
                 </div>
               ) : (
                 <div className="mt-1 text-xs text-[var(--color-muted)]">
-                  No card
+                  Account exists. No public card yet.
                 </div>
               )}
 

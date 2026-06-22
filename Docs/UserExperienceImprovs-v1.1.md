@@ -70,13 +70,13 @@ Implementation: Tell admins that deleting a user removes their account/profile/c
 #### C.3 - Keep existing guardrails visible [Not implemented] [Not tested]
 Implementation: Keep self-delete and last-admin protections, and show friendly messages when those guardrails block an action.
 
-### Step D - Better dashboard and card empty states [Partially implemented] [Partially tested]
+### Step D - Better dashboard and card empty states [Implemented] [Partially tested]
 Implementation: Improve existing empty and success states so users understand what to do next.
 #### D.1 - Improve dashboard no-card empty state [Implemented] [Tested]
 Implementation: Expand the existing no-card state with clearer next-step wording and a primary create-card action.
 #### D.2 - Improve post-save next actions [Implemented] [Tested]
 Implementation: After card save, keep the share link visible and add a clearer copy/open/share action set.
-#### D.3 - Improve admin no-card display [Partially implemented] [Not tested]
+#### D.3 - Improve admin no-card display [Implemented] [Not tested]
 Implementation: Keep the admin "No card" state but make it clearer that the user exists and has not created a public card yet.
 
 ### Step E - Image upload guidance and validation UX [Implemented] [Tested]
@@ -132,3 +132,12 @@ Implementation: Review password-reset request, callback, and update-password log
 Implementation: Preserve safe operational error logs without request bodies, raw tokens, or sensitive data.
 #### J.3 - Verify password reset still works after cleanup [Not implemented] [Not tested]
 Implementation: Retest desktop and mobile password reset after log cleanup.
+
+### Step K - Prevent duplicate submissions on important actions [Not implemented]
+Implementation: Prevent repeated clicks on important actions so users cannot accidentally submit the same operation multiple times while the first request is still running.
+#### K.1 - Add pending/disabled button states for important actions [Not implemented] [Not tested]
+Implementation: For important actions such as save, delete, block, unblock, revoke, and invite creation, disable the button immediately after the first click until the request finishes.
+#### K.2 - Show clear in-progress feedback [Not implemented] [Not tested]
+Implementation: Replace the normal button label with a clear loading state such as working, saving, deleting, or revoking so the user knows the action is in progress.
+#### K.3 - Keep repeat submissions safe on the server side [Not implemented] [Not tested]
+Implementation: Ensure important actions fail safely or return a stable result if the same request is triggered twice before the UI fully updates.
