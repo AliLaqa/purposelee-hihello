@@ -108,15 +108,15 @@ Implementation: Add a sign-out action/button to the `/admin` header so admins ca
 #### F.1 - Add sign-out button in `/admin` header [Implemented] [Tested]
 Implementation: Reuse the existing `signOut` server action and render a form/button in the admin header.
 
-### Step G - Split auth page into Sign in / Sign up [Not implemented]
+### Step G - Split auth page into Sign in / Sign up [Implemented] [Tested]
 Implementation: Replace the combined `/auth` layout with separate pages (or routes) for Sign in and Sign up, keeping the existing auth actions and admin/user login mode toggle where applicable.
-#### G.1 - Create dedicated Sign in page [Not implemented] [Not tested]
+#### G.1 - Create dedicated Sign in page [Implemented] [Tested]
 Implementation: Move the login form to a separate page (e.g., `/auth/sign-in`) with a clear link to Sign up.
-#### G.2 - Create dedicated Sign up page [Not implemented] [Not tested]
+#### G.2 - Create dedicated Sign up page [Implemented] [Tested]
 Implementation: Move the signup form to a separate page (e.g., `/auth/sign-up`) with a clear link to Sign in.
-#### G.3 - Preserve Admin/User login mode behavior for Sign in [Not implemented] [Not tested]
+#### G.3 - Preserve Admin/User login mode behavior for Sign in [Implemented] [Tested]
 Implementation: Keep the “Admin login / Normal login” toggle on the Sign in page so admins can still route to `/admin`.
-#### G.4 - Keep `/auth` as a redirect (optional) [Not implemented] [Not tested]
+#### G.4 - Keep `/auth` as a redirect (optional) [Implemented] [Tested]
 Implementation: Optionally make `/auth` redirect to `/auth/sign-in` to preserve existing links/bookmarks.
 
 ### Step H - Admin invitations + disable public signup [Implemented] [Tested]
@@ -160,13 +160,13 @@ Implementation: Ensure Supabase Auth URL Configuration allows the deployed app U
 Implementation: Verify reset email arrives, link opens the reset page, password updates successfully, and the user can sign in with the new password.
 Testing note: Desktop/browser reset flow passed locally; mobile password-reset validation passed on personal devices.
 
-### Step L - Image upload size limits [Not implemented]
+### Step L - Image upload size limits [Implemented] [Tested]
 Implementation: Add explicit image size guardrails for avatar/logo uploads so large files are blocked before they create Storage or UX issues.
-#### L.1 - Define maximum allowed avatar/logo file size [Not implemented] [Not tested]
+#### L.1 - Define maximum allowed avatar/logo file size [Implemented] [Tested]
 Implementation: Choose a practical max size for v1.1 (for example 5MB or 10MB) and document it in the upload UI.
-#### L.2 - Enforce size limit before upload [Not implemented] [Not tested]
+#### L.2 - Enforce size limit before upload [Implemented] [Tested]
 Implementation: Reject oversized image files in the card save flow with a clear user-facing error before attempting Storage upload.
-#### L.3 - Manual test large image rejection [Not implemented] [Not tested]
+#### L.3 - Manual test large image rejection [Implemented] [Tested]
 Implementation: Test with an image larger than the configured limit and confirm the card data is not saved with a failed/partial upload.
 
 ### Step M - iOS vCard validation [Not implemented]
@@ -176,11 +176,11 @@ Implementation: Open a public card on iOS Safari/Chrome, download the vCard, and
 #### M.2 - Verify imported iOS contact fields [Not implemented] [Not tested]
 Implementation: Confirm name, company, email, and phone are populated correctly after import.
 
-### Step N - Production observability hardening [Not implemented]
+### Step N - Production observability hardening [Partially implemented]
 Implementation: Finish production-grade observability by configuring runtime error tracking and expanding audit-event coverage while keeping sensitive/debug data out of Postgres.
-#### N.1 - Configure runtime error tracking in production [Not implemented] [Not tested]
+#### N.1 - Configure runtime error tracking in production [Partially implemented] [Not tested]
 Implementation: Add a production `SENTRY_DSN` (or equivalent provider DSN) in Vercel and verify client/server exceptions are captured with useful context.
-#### N.2 - Expand DB audit events only for auditable product actions [Not implemented] [Not tested]
+#### N.2 - Expand DB audit events only for auditable product actions [Partially implemented] [Not tested]
 Implementation: Add audit rows for selected important actions beyond existing admin events, while continuing to avoid raw stack traces, request bodies, and sensitive data.
 #### N.3 - Remove verbose password-reset debug logs before production deploy [Not implemented] [Not tested]
 Implementation: Before Vercel production deployment, remove/reduce temporary password-reset diagnostic logs while keeping the dynamic-origin reset logic and callback cookie handling.
