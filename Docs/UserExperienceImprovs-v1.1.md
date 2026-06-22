@@ -106,13 +106,13 @@ Implementation: Ensure missing fields, slug taken, invalid slug, upload failure,
 #### G.3 - Reduce visible internal codes where possible [Implemented] [Tested]
 Implementation: Avoid showing raw internal codes to non-technical users unless they are needed for support.
 
-### Step H - Public card action polish [Partially implemented]
+### Step H - Public card action polish [Implemented] [Tested]
 Implementation: Make the public card page clearer for recipients who only want to save or share contact details.
-#### H.1 - Prioritize save/share actions [Partially implemented] [Not tested]
+#### H.1 - Prioritize save/share actions [Implemented] [Tested]
 Implementation: Review the order and labels of save contact, copy link, share, and email share actions.
-#### H.2 - Improve no-avatar presentation [Partially implemented] [Not tested]
+#### H.2 - Improve no-avatar presentation [Implemented] [Tested]
 Implementation: Use a clear placeholder or initials treatment when no avatar exists instead of an empty square.
-#### H.3 - Verify public card mobile spacing [Partially implemented] [Not tested]
+#### H.3 - Verify public card mobile spacing [Implemented] [Tested]
 Implementation: Confirm all fields, QR code, and actions remain readable on common mobile widths.
 
 ### Step I - Admin audit visibility [Not implemented]

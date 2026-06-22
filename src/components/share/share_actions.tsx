@@ -8,6 +8,9 @@ type Props = {
   title?: string;
   emailSubject?: string;
   emailBody?: string;
+  copyLabel?: string;
+  shareLabel?: string;
+  emailLabel?: string;
 };
 
 export function ShareActions({
@@ -15,6 +18,9 @@ export function ShareActions({
   title = "MyHello Card",
   emailSubject = "My digital card",
   emailBody,
+  copyLabel = "Copy link",
+  shareLabel = "Share",
+  emailLabel = "Share by email",
 }: Props) {
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">(
     "idle"
@@ -104,35 +110,35 @@ export function ShareActions({
   );
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row">
+    <div className="grid gap-2 sm:flex sm:flex-row">
       <button
         type="button"
         onClick={copy}
-        className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--color-border)] px-4 text-sm font-semibold text-[var(--color-text)]"
+        className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-[var(--color-border)] px-4 text-sm font-semibold text-[var(--color-text)] sm:w-auto"
       >
         {copyStatus === "copied"
           ? "Copied"
           : copyStatus === "failed"
           ? "Copy failed"
-          : "Copy link"}
+          : copyLabel}
       </button>
 
       {canShare ? (
         <button
           type="button"
           onClick={webShare}
-          className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-semibold text-white"
+          className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-semibold text-white sm:w-auto"
         >
-          Share
+          {shareLabel}
         </button>
       ) : null}
 
       <a
         href={mailto}
         onClick={handleEmailShareClick}
-        className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--color-border)] px-4 text-sm font-semibold text-[var(--color-text)]"
+        className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-[var(--color-border)] px-4 text-sm font-semibold text-[var(--color-text)] sm:w-auto"
       >
-        Share by email
+        {emailLabel}
       </a>
     </div>
   );

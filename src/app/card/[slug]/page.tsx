@@ -14,6 +14,20 @@ function getBaseUrl() {
   return "http://localhost:3000";
 }
 
+function getInitials(name: string) {
+  const parts = name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2);
+
+  if (parts.length === 0) {
+    return "MH";
+  }
+
+  return parts.map((part) => part[0]?.toUpperCase() ?? "").join("");
+}
+
 type PublicCardPageProps = {
   params: Promise<{ slug: string }>;
 };
@@ -116,6 +130,7 @@ export default async function PublicCardPage(props: PublicCardPageProps) {
 
   const url = `${getBaseUrl()}/card/${encodeURIComponent(card.slug)}`;
   const vcardUrl = `/card/${encodeURIComponent(card.slug)}/vcard`;
+  const initials = getInitials(card.full_name);
 
   return (
     <div className="mx-auto w-full max-w-lg px-4 py-10">
@@ -129,7 +144,11 @@ export default async function PublicCardPage(props: PublicCardPageProps) {
                 alt={card.full_name}
                 className="h-full w-full object-cover"
               />
-            ) : null}
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-slate-100 text-lg font-semibold text-slate-700">
+                {initials}
+              </div>
+            )}
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-xl font-semibold text-[var(--color-text)]">
@@ -161,23 +180,30 @@ export default async function PublicCardPage(props: PublicCardPageProps) {
             QR code
           </div>
           <div className="mt-3 flex justify-center">
-            <div className="rounded-xl bg-white p-3">
-              <QRCode value={url} size={180} />
+            <div className="w-full max-w-[220px] rounded-xl bg-white p-3">
+              <QRCode
+                value={url}
+                size={180}
+                style={{ height: "auto", width: "100%", maxWidth: "100%" }}
+              />
             </div>
           </div>
         </div>
 
-        <div className="mt-6">
-          <ShareActions url={url} title={`${card.full_name} - MyHello`} />
-        </div>
-
-        <div className="mt-4">
+        <div className="mt-6 grid gap-2">
           <a
             href={vcardUrl}
-            className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-[var(--color-border)] px-4 text-sm font-semibold text-[var(--color-text)]"
+            className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-semibold text-white"
           >
-            Save contact (vCard)
+            Save contact
           </a>
+          <ShareActions
+            url={url}
+            title={`${card.full_name} - MyHello`}
+            copyLabel="Copy card link"
+            shareLabel="Share card"
+            emailLabel="Email card"
+          />
         </div>
       </div>
     </div>
