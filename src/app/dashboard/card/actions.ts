@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/guards";
+import { validateAvatarFile } from "@/lib/cards/avatar";
 import { isValidSlug, slugify } from "@/lib/cards/slug";
 import { randomUUID } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -35,6 +36,11 @@ export async function upsertCard(formData: FormData) {
   const avatarFile = formData.get("avatar");
   const avatar =
     avatarFile && typeof avatarFile !== "string" ? avatarFile : null;
+  const avatarValidationError = validateAvatarFile(avatar);
+
+  if (avatarValidationError) {
+    redirect(`/dashboard/card?error=${avatarValidationError}`);
+  }
 
   const { data: existing } = await supabase
     .from("cards")
@@ -43,6 +49,7 @@ export async function upsertCard(formData: FormData) {
     .maybeSingle();
 
   let avatarPath: string | null = existing?.avatar_path ?? null;
+  let uploadedAvatarPath: string | null = null;
 
   if (avatar && avatar.size > 0) {
     const extension = avatar.name.split(".").pop()?.toLowerCase() || "png";
@@ -60,6 +67,7 @@ export async function upsertCard(formData: FormData) {
     }
 
     avatarPath = path;
+    uploadedAvatarPath = path;
   }
 
   if (!existing) {
@@ -75,6 +83,10 @@ export async function upsertCard(formData: FormData) {
     });
 
     if (error) {
+      if (uploadedAvatarPath) {
+        await supabase.storage.from("avatars").remove([uploadedAvatarPath]);
+      }
+
       console.error("Card insert failed", error);
       const isSlugConflict = String(error.message || "")
         .toLowerCase()
@@ -101,6 +113,10 @@ export async function upsertCard(formData: FormData) {
       .eq("id", existing.id);
 
     if (error) {
+      if (uploadedAvatarPath) {
+        await supabase.storage.from("avatars").remove([uploadedAvatarPath]);
+      }
+
       console.error("Card update failed", error);
       const isSlugConflict = String(error.message || "")
         .toLowerCase()

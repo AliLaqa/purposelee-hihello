@@ -22,8 +22,12 @@ function errorMessage(code?: string) {
       return "Slug can only contain letters, numbers, and hyphens.";
     case "slug_taken":
       return "That slug is already taken. Choose another.";
+    case "avatar_file_type_invalid":
+      return "Upload a JPG, PNG, or WebP image.";
+    case "avatar_file_too_large":
+      return "Image is too large. Upload one that is 5 MB or smaller.";
     case "avatar_upload_failed":
-      return "Avatar upload failed. Try again.";
+      return "We could not upload your image, so your card details were not saved. Try again.";
     case "delete_confirm_required":
       return "Confirm card deletion before deleting.";
     case "delete_failed":

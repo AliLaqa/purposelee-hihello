@@ -79,13 +79,13 @@ Implementation: After card save, keep the share link visible and add a clearer c
 #### D.3 - Improve admin no-card display [Partially implemented] [Not tested]
 Implementation: Keep the admin "No card" state but make it clearer that the user exists and has not created a public card yet.
 
-### Step E - Image upload guidance and validation UX [Not implemented]
+### Step E - Image upload guidance and validation UX [Implemented] [Tested]
 Implementation: Make avatar/photo upload expectations clear and reject invalid files with friendly messages.
-#### E.1 - Show allowed image guidance [Not implemented] [Not tested]
+#### E.1 - Show allowed image guidance [Implemented] [Tested]
 Implementation: Display accepted image types and max upload size near the avatar field.
-#### E.2 - Enforce max upload size with clear message [Not implemented] [Not tested]
+#### E.2 - Enforce max upload size with clear message [Implemented] [Tested]
 Implementation: Reject oversized images before saving and show a user-friendly error.
-#### E.3 - Keep failed upload from creating confusing partial state [Not implemented] [Not tested]
+#### E.3 - Keep failed upload from creating confusing partial state [Implemented] [Tested]
 Implementation: Confirm card data is not saved in a misleading way when an avatar upload fails.
 
 ### Step F - Mobile admin layout polish [Not implemented]
