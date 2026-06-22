@@ -9,10 +9,29 @@ import { randomUUID } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseSecretKey } from "@/lib/env";
 
+type UserSupabaseClient = Awaited<ReturnType<typeof requireUser>>["supabase"];
+
 function getSiteUrl(): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL;
   if (configured) return configured.replace(/\/+$/, "");
   return "http://localhost:3000";
+}
+
+async function removeAvatarFiles(
+  supabase: UserSupabaseClient,
+  paths: string[],
+) {
+  if (!paths.length) return;
+
+  const storage = getSupabaseSecretKey()
+    ? createAdminClient().storage
+    : supabase.storage;
+
+  const { error } = await storage.from("avatars").remove(paths);
+
+  if (error) {
+    console.error("Avatar remove failed", { paths, error });
+  }
 }
 
 export async function upsertCard(formData: FormData) {
@@ -23,6 +42,7 @@ export async function upsertCard(formData: FormData) {
   const email = String(formData.get("email") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
   const rawSlug = String(formData.get("slug") || "").trim();
+  const removeAvatar = String(formData.get("remove_avatar") || "") === "1";
 
   if (!fullName || !company || !email || !phone) {
     redirect("/dashboard/card?error=missing_fields");
@@ -48,7 +68,8 @@ export async function upsertCard(formData: FormData) {
     .eq("user_id", userId)
     .maybeSingle();
 
-  let avatarPath: string | null = existing?.avatar_path ?? null;
+  const existingAvatarPath = existing?.avatar_path ?? null;
+  let avatarPath: string | null = removeAvatar ? null : existingAvatarPath;
   let uploadedAvatarPath: string | null = null;
 
   if (avatar && avatar.size > 0) {
@@ -84,7 +105,7 @@ export async function upsertCard(formData: FormData) {
 
     if (error) {
       if (uploadedAvatarPath) {
-        await supabase.storage.from("avatars").remove([uploadedAvatarPath]);
+        await removeAvatarFiles(supabase, [uploadedAvatarPath]);
       }
 
       console.error("Card insert failed", error);
@@ -110,7 +131,7 @@ export async function upsertCard(formData: FormData) {
 
     if (error) {
       if (uploadedAvatarPath) {
-        await supabase.storage.from("avatars").remove([uploadedAvatarPath]);
+        await removeAvatarFiles(supabase, [uploadedAvatarPath]);
       }
 
       console.error("Card update failed", error);
@@ -126,6 +147,18 @@ export async function upsertCard(formData: FormData) {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/card");
   revalidatePath(`/card/${slug}`);
+
+  if (
+    uploadedAvatarPath &&
+    existingAvatarPath &&
+    existingAvatarPath !== uploadedAvatarPath
+  ) {
+    await removeAvatarFiles(supabase, [existingAvatarPath]);
+  }
+
+  if (removeAvatar && !uploadedAvatarPath && existingAvatarPath) {
+    await removeAvatarFiles(supabase, [existingAvatarPath]);
+  }
 
   const shareUrl = `${getSiteUrl()}/card/${encodeURIComponent(slug)}`;
   redirect(`/dashboard/card?saved=1&share=${encodeURIComponent(shareUrl)}`);

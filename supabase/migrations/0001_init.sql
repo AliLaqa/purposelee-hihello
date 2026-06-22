@@ -201,6 +201,11 @@ with check (false);
 --    Use this condition:
 --      bucket_id = 'avatars'
 --      AND (storage.foldername(name))[1] = (select auth.uid()::text)
+-- 3) Storage -> Policies -> New policy on `storage.objects` (operation: DELETE)
+--    Use this condition:
+--      bucket_id = 'avatars'
+--      AND (storage.foldername(name))[1] = (select auth.uid()::text)
 --
 -- In v1 the app uploads avatars to a unique path `${auth.uid()}/{uuid}.ext`,
--- so INSERT is sufficient (no upsert/overwrite required).
+-- so INSERT is sufficient for uploads (no upsert/overwrite required), and
+-- DELETE is needed for self-service avatar removal and cleanup.

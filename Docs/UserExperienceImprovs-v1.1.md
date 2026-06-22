@@ -70,13 +70,13 @@ Implementation: Tell admins that deleting a user removes their account/profile/c
 #### C.3 - Keep existing guardrails visible [Not implemented] [Not tested]
 Implementation: Keep self-delete and last-admin protections, and show friendly messages when those guardrails block an action.
 
-### Step D - Better dashboard and card empty states [Implemented] [Partially tested]
+### Step D - Better dashboard and card empty states [Implemented] [Tested]
 Implementation: Improve existing empty and success states so users understand what to do next.
 #### D.1 - Improve dashboard no-card empty state [Implemented] [Tested]
 Implementation: Expand the existing no-card state with clearer next-step wording and a primary create-card action.
 #### D.2 - Improve post-save next actions [Implemented] [Tested]
 Implementation: After card save, keep the share link visible and add a clearer copy/open/share action set.
-#### D.3 - Improve admin no-card display [Implemented] [Not tested]
+#### D.3 - Improve admin no-card display [Implemented] [Tested]
 Implementation: Keep the admin "No card" state but make it clearer that the user exists and has not created a public card yet.
 
 ### Step E - Image upload guidance and validation UX [Implemented] [Tested]
@@ -87,6 +87,10 @@ Implementation: Display accepted image types and max upload size near the avatar
 Implementation: Reject oversized images before saving and show a user-friendly error.
 #### E.3 - Keep failed upload from creating confusing partial state [Implemented] [Tested]
 Implementation: Confirm card data is not saved in a misleading way when an avatar upload fails.
+#### E.4 - Let users remove an avatar while editing a card [Implemented] [Tested]
+Implementation: Add a clear remove-image control in the card editor so pressing it means no avatar should remain on the card after save. If a saved avatar exists, it should be removed from the card and cleaned from Storage on save. If a new image was only selected in the editor, the control should clear it instead of keeping any previous avatar.
+#### E.5 - Clean up replaced avatar files safely [Implemented] [Tested]
+Implementation: When a user replaces an existing avatar, delete the previous stored file after the new image is saved successfully so Storage does not accumulate orphaned avatar files.
 
 ### Step F - Mobile admin layout polish [Not implemented]
 Implementation: Make admin user/card/invite management easier to scan and operate on small screens.

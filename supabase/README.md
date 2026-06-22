@@ -12,6 +12,15 @@ This folder contains the database source-of-truth for MyHello v1.
 3. Run migrations in order (lowest number first) from `supabase/migrations/`.
 4. (Optional) Run `supabase/seed.sql`.
 5. Create a Storage bucket named `avatars` (if you did not run the bucket SQL, or if it fails due to permissions).
+6. Ensure Storage policies allow authenticated users to manage only their own avatar objects:
+   - `INSERT` on `storage.objects`:
+     - `bucket_id = 'avatars'`
+     - `AND (storage.foldername(name))[1] = (select auth.uid()::text)`
+   - `DELETE` on `storage.objects`:
+     - `bucket_id = 'avatars'`
+     - `AND (storage.foldername(name))[1] = (select auth.uid()::text)`
+
+If the SQL Editor cannot create policies on `storage.objects`, add these policies in the Supabase Dashboard under `Storage -> Policies`.
 
 ## Required environment variables (app)
 Set these in `.env.local` (for local dev) and in Vercel project env vars (for production):
@@ -23,4 +32,3 @@ Set these in `.env.local` (for local dev) and in Vercel project env vars (for pr
 ## Notes
 - The `SUPABASE_SECRET_KEY` must never be exposed to the browser.
 - Public card pages rely on RLS policies that allow public `SELECT` on active cards.
-
