@@ -11,15 +11,15 @@ type SearchParams = {
 function errorMessage(error?: string, code?: string) {
   switch (error) {
     case "missing_password":
-      return "Password and confirmation are required.";
+      return "Enter and confirm your new password.";
     case "password_too_short":
-      return "Password is too short (min 6 characters).";
+      return "Use at least 6 characters.";
     case "password_mismatch":
       return "Passwords do not match.";
     case "update_failed":
       return code === "same_password"
-        ? "Choose a password that is different from the old password."
-        : "Unable to update password. Open the reset link again.";
+        ? "Use a different password."
+        : "We could not update your password. Open the reset link again.";
     default:
       return error ? "Something went wrong. Try again." : null;
   }

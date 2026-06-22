@@ -17,72 +17,72 @@ export function getAuthErrorMessage(error?: string, code?: string) {
   if (!error) return null;
 
   if (error === "missing_credentials") {
-    return "Email and password are required.";
+    return "Enter your email and password.";
   }
 
   if (error === "invite_required") {
-    return "Signup requires an admin invite link.";
+    return "Use an invite link to create your account.";
   }
 
   if (error === "invalid_invite") {
     if (code === "missing") {
-      return "This invite link is no longer valid. Ask your admin for a new invite link.";
+      return "This invite link is not valid. Ask for a new one.";
     }
 
     if (code === "expired") {
-      return "This invite link has expired. Ask your admin to send you a new invite.";
+      return "This invite link has expired. Ask for a new one.";
     }
 
     if (code === "revoked") {
-      return "This invite link was revoked by an admin. Ask for a new invite if you still need access.";
+      return "This invite was canceled. Ask for a new one.";
     }
 
     if (code === "accepted") {
-      return "This invite link has already been used. Sign in if your account already exists, or ask your admin for a new invite.";
+      return "This invite was already used. Sign in or ask for a new one.";
     }
 
     if (code === "email_mismatch") {
-      return "This invite is for a different email address. Use the same email address that received the invite.";
+      return "Use the email address that got the invite.";
     }
 
-    return "This invite link is not valid for signup. Ask your admin for a new invite.";
+    return "This invite link is not valid. Ask for a new one.";
   }
 
   if (error === "invite_check_unavailable") {
-    return "Invite validation is not configured on the server.";
+    return "We could not verify your invite. Try again.";
   }
 
   if (error === "auth_callback_failed") {
-    return "Unable to complete auth redirect. Try again.";
+    return "We could not sign you in. Try again.";
   }
 
   if (error === "invalid_login") {
     return code === "email_not_confirmed"
-      ? "Email not confirmed yet. Check your inbox."
-      : "Invalid email or password.";
+      ? "Confirm your email, then sign in."
+      : "Email or password is wrong.";
   }
 
   if (error === "signup_failed") {
     if (code === "email_address_invalid") {
-      return "Email address is invalid.";
+      return "Enter a valid email.";
     }
 
     if (code === "password_too_short") {
-      return "Password is too short (min 6 characters).";
+      return "Use at least 6 characters.";
     }
 
     if (code === "over_email_send_rate_limit") {
-      return "Signup email rate limit exceeded. Disable email confirmations in Supabase for local testing, or wait and try again.";
+      return "Too many emails were sent. Wait a bit and try again.";
     }
 
     if (code === "signup_disabled") {
-      return "Signups are disabled in Supabase Auth settings.";
+      return "Account creation is not available right now.";
     }
 
-    return "Unable to sign up with those credentials.";
+    return "We could not create your account. Try again.";
   }
 
-  return "Something went wrong. Please try again.";
+  return "Something went wrong. Try again.";
 }
 
 function getInviteRecipientGuidance() {
@@ -192,13 +192,13 @@ export function AuthStatusBanners({
 
       {blocked ? (
         <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-          Your account is blocked. Contact an admin.
+          This account is blocked. Contact an admin.
         </div>
       ) : null}
 
       {passwordReset ? (
         <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
-          Password updated. Sign in with your new password.
+          Password changed. Sign in again.
         </div>
       ) : null}
 

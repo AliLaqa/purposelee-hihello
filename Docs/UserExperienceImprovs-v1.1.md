@@ -101,9 +101,9 @@ Implementation: Make block, delete card, and delete user actions readable and ta
 #### F.3 - Improve invite list layout on mobile [Not implemented] [Not tested]
 Implementation: Ensure invite email, status, link, copy action, and revoke action are readable on phones.
 
-### Step G - Friendly error and status messages [Partially implemented]
+### Step G - Friendly error and status messages [Implemented] [Tested]
 Implementation: Replace technical or ambiguous flow messages with plain-language explanations and next steps.
-#### G.1 - Review auth error messages [Partially implemented] [Not tested]
+#### G.1 - Review auth error messages [Implemented] [Tested]
 Implementation: Ensure invalid login, missing credentials, blocked account, invite required, invalid invite, and signup failure messages are clear.
 #### G.2 - Review card editor error messages [Implemented] [Tested]
 Implementation: Ensure missing fields, slug taken, invalid slug, upload failure, save failure, and delete failure messages are actionable.

@@ -12,9 +12,9 @@ type SearchParams = {
 function errorMessage(error?: string) {
   switch (error) {
     case "missing_email":
-      return "Email is required.";
+      return "Enter your email.";
     default:
-      return error ? "Unable to send reset email. Try again." : null;
+      return error ? "We could not send the reset link. Try again." : null;
   }
 }
 
