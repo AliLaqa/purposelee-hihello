@@ -39,26 +39,26 @@ MyHello v1.1 UX work focuses on making the existing product easier for non-techn
 
 ## UX Plan (v1.1)
 
-### Step A - Separate auth pages [Not implemented]
+### Step A - Separate auth pages [Implemented] [Tested]
 Implementation: Replace the combined `/auth` experience with clearer dedicated sign-in and sign-up routes while preserving existing auth behavior.
-#### A.1 - Create focused sign-in page [Not implemented] [Not tested]
+#### A.1 - Create focused sign-in page [Implemented] [Tested]
 Implementation: Move the login form to a dedicated sign-in route and keep the Admin/User login mode behavior.
-#### A.2 - Create focused invite sign-up page [Not implemented] [Not tested]
+#### A.2 - Create focused invite sign-up page [Implemented] [Tested]
 Implementation: Move invited-user signup into a dedicated route or focused invite state that clearly explains the invite flow.
-#### A.3 - Keep old `/auth` links safe [Not implemented] [Not tested]
+#### A.3 - Keep old `/auth` links safe [Implemented] [Tested]
 Implementation: Redirect or route existing `/auth` links to the appropriate sign-in page without breaking password reset or invite links.
-#### A.4 - Preserve all current auth outcomes [Not implemented] [Not tested]
+#### A.4 - Preserve all current auth outcomes [Implemented] [Tested]
 Implementation: Verify normal login, admin login, invite signup, blocked-user messaging, and password-reset success messaging still work.
 
-### Step B - Invite UX clarity and copy controls [Not implemented]
+### Step B - Invite UX clarity and copy controls [Partially implemented] [Partially tested]
 Implementation: Make admin-created invite links easier to copy and make invite acceptance easier for non-technical users.
 #### B.1 - Add copy invite link button in `/admin` [Not implemented] [Not tested]
 Implementation: Render a clear copy control beside each invite URL so admins do not need to manually select raw text.
-#### B.2 - Improve invite recipient messaging [Not implemented] [Not tested]
+#### B.2 - Improve invite recipient messaging [Implemented] [Tested]
 Implementation: When an invite token is present, show plain-language text explaining that the user was invited to create a MyHello account.
 #### B.3 - Clarify invite status and expiry [Not implemented] [Not tested]
 Implementation: Show pending, accepted, revoked, and expired invite states with readable labels and dates.
-#### B.4 - Improve invalid invite errors [Not implemented] [Not tested]
+#### B.4 - Improve invalid invite errors [Implemented] [Tested]
 Implementation: Explain whether an invite is invalid, expired, revoked, or for a different email when that can be shown safely.
 
 ### Step C - Safer admin destructive actions [Not implemented]

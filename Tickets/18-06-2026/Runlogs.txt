@@ -1,0 +1,35 @@
+PS G:\GithubProjects\purposelee-hihello> npm run dev
+
+> purposelee-hihello@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.100.147:3000
+- Environments: .env.local
+✓ Ready in 813ms
+⚠ Slow filesystem detected. The benchmark took 200ms. If G:\GithubProjects\purposelee-hihello\.next/dev is a network drive, consider moving it to a local folder.
+See more: https://nextjs.org/docs/app/guides/local-development
+
+ GET / 200 in 1123ms (next.js: 186ms, proxy.ts: 307ms, application-code: 630ms)
+ GET / 200 in 284ms (next.js: 21ms, proxy.ts: 53ms, application-code: 209ms)
+ GET /auth/sign-in 200 in 113ms (next.js: 59ms, proxy.ts: 8ms, application-code: 46ms)
+ GET /auth/forgot-password 200 in 90ms (next.js: 38ms, proxy.ts: 9ms, application-code: 43ms)
+Password reset requested {
+  email: 'mu***@gmail.com',
+  siteUrl: 'http://192.168.100.147:3000',
+  requestOrigin: 'http://localhost:3000',
+  redirectTo: 'http://localhost:3000/auth/callback?next=/auth/reset-password',
+  request: {
+    host: 'localhost:3000',
+    origin: 'http://localhost:3000',
+    referer: 'http://localhost:3000/auth/forgot-password',
+    forwardedHost: 'localhost:3000',
+    forwardedProto: 'http'
+  }
+}
+ GET /auth/forgot-password?sent=1 200 in 63ms (next.js: 4ms, proxy.ts: 9ms, application-code: 49ms)
+ POST /auth/forgot-password 303 in 3.1s (next.js: 6ms, proxy.ts: 11ms, application-code: 3.1s)
+  └─ ƒ requestPasswordReset({}) in 3029ms src/app/auth/actions.ts
+ GET /?code=6aeb7b33-c27d-4d0d-ad4e-dd0e5cc810e9 200 in 75ms (next.js: 6ms, proxy.ts: 9ms, application-code: 60ms)
+✓ Compiled in 6.4s

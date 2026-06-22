@@ -42,13 +42,13 @@ async function HomeServer() {
         )}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Link
-            href="/auth"
+            href="/auth/sign-in"
             className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-semibold text-white"
           >
             Sign in
           </Link>
           <Link
-            href="/auth"
+            href="/auth/sign-up"
             className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--color-border)] px-4 text-sm font-semibold text-[var(--color-text)]"
           >
             Create account

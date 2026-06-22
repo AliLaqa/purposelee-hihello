@@ -69,7 +69,7 @@ export default async function ForgotPasswordPage(props: {
         </form>
 
         <Link
-          href="/auth"
+          href="/auth/sign-in"
           className="mt-4 inline-flex text-sm font-semibold text-[var(--color-text)] underline"
         >
           Back to sign in

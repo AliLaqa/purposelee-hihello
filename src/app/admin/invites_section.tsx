@@ -150,7 +150,7 @@ export default function InvitesSection({
 
       <div className="mt-4 grid gap-3">
         {invites.map((invite) => {
-          const inviteUrl = `${getSiteUrl()}/auth?invite=${encodeURIComponent(
+          const inviteUrl = `${getSiteUrl()}/auth/sign-up?invite=${encodeURIComponent(
             invite.token,
           )}`;
           const inviteStatus = getInviteStatusMeta(
