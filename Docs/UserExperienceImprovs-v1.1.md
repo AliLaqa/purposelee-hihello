@@ -61,13 +61,13 @@ Implementation: Show pending, accepted, revoked, and expired invite states with 
 #### B.4 - Improve invalid invite errors [Implemented] [Tested]
 Implementation: Explain whether an invite is invalid, expired, revoked, or for a different email when that can be shown safely.
 
-### Step C - Safer admin destructive actions [Not implemented]
+### Step C - Safer admin destructive actions [Implemented] [Tested]
 Implementation: Reduce accidental account deletion by adding explicit confirmation UX to admin user deletion.
-#### C.1 - Add confirmation requirement to admin delete user [Not implemented] [Not tested]
+#### C.1 - Add confirmation requirement to admin delete user [Implemented] [Tested]
 Implementation: Require a checkbox or typed confirmation before deleting a user account from `/admin`.
-#### C.2 - Explain delete-user consequences [Not implemented] [Not tested]
-Implementation: Tell admins that deleting a user removes their account/profile/card data and attempts avatar cleanup.
-#### C.3 - Keep existing guardrails visible [Not implemented] [Not tested]
+#### C.2 - Keep delete-user confirmation concise [Implemented] [Tested]
+Implementation: Keep the delete-user control short and readable, without extra explanatory text beside the action.
+#### C.3 - Keep existing guardrails visible [Implemented] [Tested]
 Implementation: Keep self-delete and last-admin protections, and show friendly messages when those guardrails block an action.
 
 ### Step D - Better dashboard and card empty states [Implemented] [Tested]

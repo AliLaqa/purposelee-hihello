@@ -157,6 +157,7 @@ export default async function AdminPage(props: {
     : { data: [] as InviteListItem[] };
 
   const adminUserIds = new Set((adminUsers ?? []).map((row) => row.user_id));
+  const adminCount = adminUsers?.length ?? 0;
   const userRows: AdminUserListItem[] = (users ?? []).map((user) => {
     const firstCard = Array.isArray(user.cards) ? user.cards[0] : null;
     const accountType: "Admin" | "User" = adminUserIds.has(user.id)
@@ -298,7 +299,11 @@ export default async function AdminPage(props: {
         counts={inviteCounts}
       />
 
-      <UsersSection users={userRows} actorUserId={actorUserId} />
+      <UsersSection
+        users={userRows}
+        actorUserId={actorUserId}
+        adminCount={adminCount}
+      />
     </div>
   );
 }

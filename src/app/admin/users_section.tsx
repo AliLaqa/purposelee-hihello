@@ -6,11 +6,13 @@ import type { AdminUserListItem } from "./types";
 type UsersSectionProps = {
   users: AdminUserListItem[];
   actorUserId: string;
+  adminCount: number;
 };
 
 export default function UsersSection({
   users,
   actorUserId,
+  adminCount,
 }: UsersSectionProps) {
   return (
     <div className="mt-8 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -19,9 +21,15 @@ export default function UsersSection({
         <AdminRefreshButton label="Users" />
       </div>
       <div className="divide-y divide-[var(--color-border)]">
-        {users.map((user) => (
-          <div key={user.id} className="px-4 py-3">
-            <div className="min-w-0">
+        {users.map((user) => {
+          const isCurrentAdmin = user.id === actorUserId;
+          const isAdminAccount = user.accountType === "Admin";
+          const deleteBlockedByAdminMinimum = isAdminAccount && adminCount <= 2;
+          const canDeleteUser = !isCurrentAdmin && !deleteBlockedByAdminMinimum;
+
+          return (
+            <div key={user.id} className="px-4 py-3">
+              <div className="min-w-0">
               <div className="mb-2 grid gap-1 text-xs text-[var(--color-muted)]">
                 <div className="flex items-center gap-2">
                   <span>Status</span>
@@ -106,7 +114,7 @@ export default function UsersSection({
                   </form>
                 ) : null}
 
-                {user.id === actorUserId ? null : (
+                {canDeleteUser ? (
                   <form action={deleteUser} className="grid gap-2">
                     <input type="hidden" name="user_id" value={user.id} />
                     <label className="flex items-center gap-2 text-xs text-[var(--color-muted)]">
@@ -122,11 +130,25 @@ export default function UsersSection({
                       Delete User
                     </button>
                   </form>
-                )}
+                ) : isCurrentAdmin ? (
+                  <div className="grid gap-2">
+                    <p className="max-w-xs text-xs text-[var(--color-muted)]">
+                      Your own admin account cannot be deleted here.
+                    </p>
+                  </div>
+                ) : deleteBlockedByAdminMinimum ? (
+                  <div className="grid gap-2">
+                    <p className="max-w-xs text-xs text-[var(--color-muted)]">
+                      Keep at least two admins. This admin cannot be deleted
+                      right now.
+                    </p>
+                  </div>
+                ) : null}
+              </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
